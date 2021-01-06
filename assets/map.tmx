@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="120" height="34" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="18">
+ <properties>
+  <property name="background" value="background.png"/>
+  <property name="evil-tank" value="evil-tank.png"/>
+  <property name="tank" value="tank.png"/>
+ </properties>
+ <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" spacing="1" tilecount="336" columns="24">
+  <image source="tileset.png" width="791" height="461"/>
+ </tileset>
+ <tileset firstgid="337" name="items" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="items.png" trans="ffffff" width="512" height="512"/>
+ </tileset>
+ <objectgroup id="5" name="background">
+  <object id="12" name="Background" type="background" x="0" y="0" width="1980" height="1088">
+   <properties>
+    <property name="frames" type="int" value="1"/>
+    <property name="texture" value="background"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <layer id="1" name="background" width="120" height="34">
+  <data encoding="base64" compression="zlib">
+   eJzt27kNwkAQheFdqALcFg0gKkAUQw1AARwZUABHExwxBTCWCVYItF6MNWb4P+nJydoe6SUOxs7BspsnlgMAAABAR/453iqRttaAqKSbEPwe+v0P9AoAAAAAAAAAzbXSHgC1OmoPgFrRr230Gzf2RTTPfnoP/cbRbzPNJYsgS91xVFjudyfZBznojqPCer+ZL7rNr/Rry0lyDnJ5c65n+P+3q/YAFcT2oF/t3T3vRvflIQMD/U4k08TMVCYtr+PSdmXDZI9nDKXbkYF+15JNYrZffP8d3AOujg==
+  </data>
+ </layer>
+ <layer id="4" name="foreground" width="120" height="34">
+  <data encoding="base64" compression="zlib">
+   eJztxzENADAMA7BgGIzBKH9Qg5BvUiX7cwIAAAAAAAAAAAAAAAAAf5xydrvl7DblACQPdAoA/Q==
+  </data>
+ </layer>
+ <objectgroup id="2" name="objects">
+  <object id="7" name="Player" type="player" x="100" y="1000" width="128" height="64">
+   <properties>
+    <property name="frames" type="int" value="4"/>
+    <property name="texture" value="tank"/>
+   </properties>
+  </object>
+  <object id="15" name="Enemy1" type="enemy" x="1584" y="575" width="128" height="64">
+   <properties>
+    <property name="frames" type="int" value="4"/>
+    <property name="texture" value="evil-tank"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

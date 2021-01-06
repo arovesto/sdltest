@@ -1,0 +1,9 @@
+github.com/veandco/go-sdl2 v0.4.0 h1:l9q6K+Dvpd/VlZdw2ufApKnWhAQqx9UL8Zrvbjtm3Lw=
+github.com/veandco/go-sdl2 v0.4.0/go.mod h1:FB+kTpX9YTE+urhYiClnRzpOXbiWgaU3+5F2AB78DPg=
+github.com/veandco/go-sdl2 v0.4.5 h1:GFIjMabK7y2XWpr9sGvN7RDKHt7vrA7XPTUW60eOw+Y=
+github.com/veandco/go-sdl2 v0.4.5/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
+golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 h1:go1bK/D/BFZV2I8cIQd1NKEZ+0owSTG1fDTci4IqFcE=
+golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
+gopkg.in/yaml.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=
