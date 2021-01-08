@@ -14,62 +14,71 @@ const (
 	SFX
 )
 
-var manager *Manager
+var m *Manager
 
 type Manager struct {
 	sfxs  map[string]*mix.Chunk
 	music map[string]*mix.Music
+
+	volume int
 }
 
 func init() {
-	if err := mix.OpenAudio(22050, sdl.AUDIO_S16, 2, 4096); err != nil {
+	if err := mix.Init(mix.INIT_FLAC | mix.INIT_MP3); err != nil {
 		panic(err)
 	}
-	manager = &Manager{sfxs: map[string]*mix.Chunk{}, music: map[string]*mix.Music{}}
+	if err := mix.OpenAudio(mix.DEFAULT_FREQUENCY, sdl.AUDIO_S16, 2, 4096); err != nil {
+		panic(err)
+	}
+	mix.Volume(-1, 16)
+	m = &Manager{sfxs: map[string]*mix.Chunk{}, music: map[string]*mix.Music{}, volume: mix.Volume(-1, -1)}
 }
 
-func (m *Manager) Load(file string, t Type, id string) (err error) {
+func Load(file string, t Type, id string) (err error) {
 	switch t {
 	case MUSIC:
-		if music, err := mix.LoadMUS(file); err == nil {
-			m.music[id] = music
-			return
-		} else {
-			return err
-		}
+		m.music[id], err = mix.LoadMUS(file)
 	case SFX:
-		if chunk, err := mix.LoadWAV(file); err == nil {
-			m.sfxs[id] = chunk
-			return
-		} else {
-			return err
-		}
+		m.sfxs[id], err = mix.LoadWAV(file)
 	default:
 		return errors.New("unknown type")
 	}
+	return
 }
 
-func (m *Manager) PlaySound(id string, loop int) error {
+func PlaySound(id string, loop int) error {
 	_, err := m.sfxs[id].Play(-1, loop)
 	return err
 }
 
-func (m *Manager) PlayMusic(id string, loop int) error {
+func PlayMusic(id string, loop int) error {
 	return m.music[id].Play(loop)
 }
 
-func (m *Manager) Destroy() {
+func HaltMusic() {
+	mix.HaltMusic()
+}
+
+func IncVolume() {
+	m.volume += 4
+	if m.volume > mix.MAX_VOLUME {
+		m.volume = mix.MAX_VOLUME
+	}
+	mix.Volume(-1, m.volume)
+}
+
+func DecVolume() {
+	m.volume -= 4
+	if m.volume < 0 {
+		m.volume = 0
+	}
+	mix.Volume(-1, m.volume)
+}
+
+func Destroy() {
 	mix.CloseAudio()
 }
 
-func Load(file string, t Type, id string) error {
-	return manager.Load(file, t, id)
-}
-
-func PlaySound(id string, loop int) error {
-	return manager.PlaySound(id, loop)
-}
-
-func PlayMusic(id string, loop int) error {
-	return manager.PlayMusic(id, loop)
+func GetVolume() int {
+	return m.volume
 }

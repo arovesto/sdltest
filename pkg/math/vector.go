@@ -21,6 +21,10 @@ func ZeroVec() Vector2D {
 	return NewVec(0, 0)
 }
 
+func (v Vector2D) IntPos() (int32, int32) {
+	return int32(v.X), int32(v.Y)
+}
+
 func (v Vector2D) Length() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
@@ -33,7 +37,7 @@ func Add(v1, v2 Vector2D) Vector2D {
 	return Vector2D{X: v1.X + v2.X, Y: v1.Y + v2.Y}
 }
 
-func Prod(v Vector2D, c float64) Vector2D {
+func Mul(v Vector2D, c float64) Vector2D {
 	return Vector2D{X: v.X * c, Y: v.Y * c}
 }
 

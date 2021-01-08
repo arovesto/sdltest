@@ -60,8 +60,6 @@ func (l *tileLayer) Render() (err error) {
 }
 
 func (l *tileLayer) Update() error {
-	l.vel.X = global.GetScrollSpeed()
-	l.pos = math.Add(l.pos, l.vel)
 	return nil
 }
 
@@ -93,9 +91,6 @@ func (o *objectLayer) Render() (err error) {
 
 func (o *objectLayer) Update() (err error) {
 	for _, o := range o.objects {
-		if o.GetType() != object.Player {
-			o.Scroll(global.GetScrollSpeed())
-		}
 		if err = o.Update(); err != nil {
 			return
 		}

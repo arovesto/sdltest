@@ -12,7 +12,7 @@
   <image source="items.png" trans="ffffff" width="512" height="512"/>
  </tileset>
  <objectgroup id="5" name="background">
-  <object id="12" name="Background" type="background" x="0" y="0" width="1980" height="1088">
+  <object id="12" name="Background" type="background" x="0" y="0" width="1920" height="1088">
    <properties>
     <property name="frames" type="int" value="1"/>
     <property name="texture" value="background"/>
@@ -30,9 +30,10 @@
   </data>
  </layer>
  <objectgroup id="2" name="objects">
-  <object id="7" name="Player" type="player" x="100" y="1000" width="128" height="64">
+  <object id="7" name="Player" type="player" x="100" y="900" width="128" height="64">
    <properties>
     <property name="frames" type="int" value="4"/>
+    <property name="maxSpeed" type="int" value="7"/>
     <property name="texture" value="tank"/>
    </properties>
   </object>
@@ -40,6 +41,7 @@
    <properties>
     <property name="frames" type="int" value="4"/>
     <property name="texture" value="evil-tank"/>
+    <property name="maxSpeed" type="int" value="7"/>
    </properties>
   </object>
  </objectgroup>

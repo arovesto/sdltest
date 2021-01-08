@@ -11,7 +11,7 @@ type enemy struct {
 
 func NewEnemy(st Properties) GameObject {
 	obj := newShooterObj(st)
-	obj.vel = math.NewVec(0, 2)
+	obj.vel = math.NewVec(2, 0)
 	return &enemy{shooterObject: obj}
 }
 
@@ -24,8 +24,13 @@ func (e *enemy) Update() error {
 			e.frame = 0
 		}
 	}
-	if e.pos.Y < 0 || e.pos.Y > 1000 {
-		e.vel.Y *= -1
+	if e.pos.X < 500 || e.pos.X > 2000 {
+		e.vel.X *= -1
+		if e.vel.X > 0 {
+			e.flip = sdl.FLIP_NONE
+		} else {
+			e.flip = sdl.FLIP_HORIZONTAL
+		}
 	}
 	return e.shooterObject.Update()
 }

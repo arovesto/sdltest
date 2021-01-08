@@ -47,6 +47,12 @@ states:
         path: "assets/resume.png"
       - id: "menu"
         path: "assets/menu.png"
+      - id: "button-left"
+        path: "assets/button-left.png"
+    fonts:
+      - id: "font"
+        path: "assets/minecraft.ttf"
+        size: 30
     objects:
       - type: button
         x: 600
@@ -62,6 +68,28 @@ states:
         h: 128
         texture: "menu"
         callback: 1
+      - type: button
+        x: 700
+        y: 500
+        w: 64
+        h: 64
+        texture: "button-left"
+        callback: 2
+      - type: button
+        x: 1200
+        y: 500
+        w: 64
+        h: 64
+        flip: "horizontal"
+        texture: "button-left"
+        callback: 3
+      - type: text
+        x: 900
+        y: 500
+        w: 200
+        h: 100
+        texture: "font"
+        callback: 0
   - id: 3
     textures:
       - id: "again"

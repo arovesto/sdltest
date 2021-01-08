@@ -53,15 +53,15 @@ type Format struct {
 }
 
 type Object struct {
-	XMLName    xml.Name   `xml:"object"`
-	Name       string     `xml:"name,attr"`
-	Type       string     `xml:"type,attr"`
-	X          int32      `xml:"x,attr"`
-	Y          int32      `xml:"y,attr"`
-	Width      int32      `xml:"width,attr"`
-	Height     int32      `xml:"height,attr"`
-	Properties []struct { // TODO store additional pngs in properties like "texture-..."
-		Property struct {
+	XMLName    xml.Name `xml:"object"`
+	Name       string   `xml:"name,attr"`
+	Type       string   `xml:"type,attr"`
+	X          int32    `xml:"x,attr"`
+	Y          int32    `xml:"y,attr"`
+	Width      int32    `xml:"width,attr"`
+	Height     int32    `xml:"height,attr"`
+	Properties struct { // TODO store additional pngs in properties like "texture-..."
+		Property []struct {
 			Name  string `xml:"name,attr"`
 			Type  string `xml:"type,attr"`
 			Value string `xml:"value,attr"`
@@ -113,16 +113,18 @@ func Parse(name string) (*Level, error) {
 			var objects []object.GameObject
 			for _, o := range n.Objects {
 				state := object.Properties{Pos: math.NewVecInt(o.X, o.Y), Size: math.NewVecInt(o.Width, o.Height), ID: o.Name}
-				for _, p := range o.Properties {
-					switch p.Property.Name {
+				for _, p := range o.Properties.Property {
+					switch p.Name {
 					case "frames":
-						state.Cols = int32(mustInt(p.Property.Value))
+						state.Cols = int32(mustInt(p.Value))
 					case "texture":
-						state.ID = p.Property.Value
+						state.ID = p.Value
 					case "callbackID":
-						state.Callback = global.ID(mustInt(p.Property.Value))
+						state.Callback = global.ID(mustInt(p.Value))
 					case "animSpeed":
-						state.AnimSpeed = uint32(mustInt(p.Property.Value))
+						state.AnimSpeed = uint32(mustInt(p.Value))
+					case "maxSpeed":
+						state.MaxSpeed = mustFloat(p.Value)
 					}
 				}
 				if obj, err := object.Create(o.Type, state); err == nil {
@@ -177,9 +179,17 @@ func readInts(r io.Reader) (ids []int, err error) {
 }
 
 func mustInt(c string) int {
-	frames, err := strconv.Atoi(c)
+	res, err := strconv.Atoi(c)
 	if err != nil {
 		panic(err)
 	}
-	return frames
+	return res
+}
+
+func mustFloat(c string) float64 {
+	res, err := strconv.ParseFloat(c, 64)
+	if err != nil {
+		panic(err)
+	}
+	return res
 }

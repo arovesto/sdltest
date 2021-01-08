@@ -1,9 +1,11 @@
 package object
 
 import (
+	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/input"
 	"github.com/arovesto/sdl/pkg/math"
+	"github.com/arovesto/sdl/pkg/sound"
 	"github.com/arovesto/sdl/pkg/state"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -21,6 +23,8 @@ type player struct {
 
 	alpha int
 	angle float64
+
+	shootAt uint32
 }
 
 func NewPlayer(st Properties) GameObject {
@@ -38,6 +42,32 @@ func (p *player) Update() (err error) {
 func (p *player) handleInput() error {
 	if input.IsKeyDown(sdl.SCANCODE_E) {
 		return global.GetMachine().ChangeState(state.GameOver)
+	}
+	now := sdl.GetTicks()
+	if input.IsKeyDown(sdl.SCANCODE_SPACE) && now-p.shootAt > 1000 {
+		if err := sound.PlaySound("shot", 0); err != nil {
+			return err
+		}
+		p.shootAt = now
+	}
+
+	camera.GoTo(math.Add(p.pos, math.NewVec(200, -400)))
+	var player math.Vector2D
+	switch {
+	case input.IsKeyDown(sdl.SCANCODE_D):
+		player.X = 0.05
+		p.flip = sdl.FLIP_NONE
+	case input.IsKeyDown(sdl.SCANCODE_A):
+		player.X = -0.05
+		p.flip = sdl.FLIP_HORIZONTAL
+	default:
+	}
+
+	friction := math.Mul(p.vel, -0.1)
+	if player.X == 0 || (friction.X > 0) == (player.X > 0) {
+		p.acc = math.Add(friction, player)
+	} else {
+		p.acc = player
 	}
 
 	return nil

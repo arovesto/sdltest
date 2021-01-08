@@ -3,62 +3,30 @@ package texturemanager
 import (
 	"errors"
 
+	"github.com/veandco/go-sdl2/ttf"
+
+	"github.com/arovesto/sdl/pkg/camera"
+
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 
 	"golang.org/x/xerrors"
 )
 
-var manager *TextureManager
+var t *manager
 
-type TextureManager struct {
+type manager struct {
 	textureMap map[string]*sdl.Texture
+	fonts      map[string]*ttf.Font
 	renderer   *sdl.Renderer
 }
 
-func InitManager(r *sdl.Renderer) {
-	manager = &TextureManager{textureMap: map[string]*sdl.Texture{}, renderer: r}
-}
-
-func Load(opts LoadOpts) error {
-	if manager == nil {
-		return errors.New("manager not initialized")
+func InitManager(r *sdl.Renderer) error {
+	if err := ttf.Init(); err != nil {
+		return err
 	}
-	return manager.Load(opts)
-}
-
-func Draw(opts DrawOpts) error {
-	if manager == nil {
-		return errors.New("manager not initialized")
-	}
-	return manager.Draw(opts)
-}
-
-func DrawTile(opts DrawTileOpts) error {
-	if manager == nil {
-		return errors.New("manager not initialized")
-	}
-	return manager.DrawTile(opts)
-}
-
-func DrawRect(id string, src, dst sdl.Rect) error {
-	if manager == nil {
-		return errors.New("manager not initialized")
-	}
-	return manager.DrawRect(id, src, dst)
-}
-
-func Destroy() error {
-	if manager == nil {
-		return errors.New("manager not initialized")
-	}
-	return manager.Destroy()
-}
-
-func Delete(id string) {
-	if manager != nil {
-		manager.Delete(id)
-	}
+	t = &manager{textureMap: map[string]*sdl.Texture{}, fonts: map[string]*ttf.Font{}, renderer: r}
+	return nil
 }
 
 type LoadOpts struct {
@@ -66,7 +34,10 @@ type LoadOpts struct {
 	ID   string
 }
 
-func (t *TextureManager) Load(opts LoadOpts) error {
+func Load(opts LoadOpts) error {
+	if t == nil {
+		return errors.New("manager not initialized")
+	}
 	s, err := img.Load(opts.Path)
 	if err != nil {
 		return err
@@ -94,10 +65,14 @@ type DrawOpts struct {
 	Alpha uint8
 }
 
-func (t *TextureManager) Draw(opts DrawOpts) error {
+func Draw(opts DrawOpts) error {
+	if t == nil {
+		return errors.New("manager not initialized")
+	}
 	if texture, ok := t.textureMap[opts.ID]; ok {
+		camX, camY := camera.GetCamPos().IntPos()
 		src := sdl.Rect{X: opts.W * opts.Col, Y: opts.H * opts.Row, W: opts.W, H: opts.H}
-		dst := sdl.Rect{X: opts.X, Y: opts.Y, W: opts.W, H: opts.H}
+		dst := sdl.Rect{X: opts.X - camX, Y: opts.Y - camY, W: opts.W, H: opts.H}
 		if err := texture.SetAlphaMod(opts.Alpha); err != nil {
 			return err
 		}
@@ -119,39 +94,95 @@ type DrawTileOpts struct {
 	Col     int32
 }
 
-func (t *TextureManager) DrawRect(id string, src, dst sdl.Rect) error {
-	if texture, ok := t.textureMap[id]; ok {
-		return t.renderer.Copy(texture, &src, &dst)
-	} else {
-		return xerrors.Errorf("texture not found: %v", id)
+func DrawTile(opts DrawTileOpts) error {
+	if t == nil {
+		return errors.New("manager not initialized")
 	}
-
-}
-
-func (t *TextureManager) DrawTile(opts DrawTileOpts) error {
 	if texture, ok := t.textureMap[opts.ID]; ok {
+		camX, camY := camera.GetCamPos().IntPos()
 		src := sdl.Rect{
 			X: opts.Margin + (opts.Spacing+opts.W)*opts.Col,
 			Y: opts.Margin + (opts.Spacing+opts.H)*opts.Row,
 			W: opts.W,
 			H: opts.H,
 		}
-		dst := sdl.Rect{X: opts.X, Y: opts.Y, W: opts.W, H: opts.H}
+		dst := sdl.Rect{X: opts.X - camX, Y: opts.Y - camY, W: opts.W, H: opts.H}
 		return t.renderer.CopyEx(texture, &src, &dst, 0, nil, sdl.FLIP_NONE)
 	} else {
 		return xerrors.Errorf("texture not found: %v", opts.ID)
 	}
 }
 
-func (t *TextureManager) Delete(id string) {
-	delete(t.textureMap, id)
+func DrawRect(id string, src, dst sdl.Rect) error {
+	if t == nil {
+		return errors.New("manager not initialized")
+	}
+	if texture, ok := t.textureMap[id]; ok {
+		return t.renderer.Copy(texture, &src, &dst)
+	} else {
+		return xerrors.Errorf("texture not found: %v", id)
+	}
 }
 
-func (t *TextureManager) Destroy() error {
+func Destroy() error {
+	if t == nil {
+		return errors.New("manager not initialized")
+	}
 	for _, p := range t.textureMap {
 		if err := p.Destroy(); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func Delete(id string) {
+	if t != nil {
+		delete(t.textureMap, id)
+	}
+}
+
+type LoadFontOpts struct {
+	ID   string
+	Path string
+	Size int
+}
+
+func LoadFont(o LoadFontOpts) (err error) {
+	if t == nil {
+		return errors.New("manager not initialized")
+	}
+	t.fonts[o.ID], err = ttf.OpenFont(o.Path, o.Size)
+	return
+}
+
+type DrawMessageOpts struct {
+	ID      string
+	Message string
+	X       int32
+	Y       int32
+	W       int32
+	H       int32
+	Color   sdl.Color
+}
+
+func DrawMessage(o DrawMessageOpts) error {
+	if t == nil {
+		return errors.New("manager not initialized")
+	}
+	if fnt, ok := t.fonts[o.ID]; ok {
+		srf, err := fnt.RenderUTF8Solid(o.Message, o.Color)
+		if err != nil {
+			return err
+		}
+		txt, err := t.renderer.CreateTextureFromSurface(srf)
+		if err != nil {
+			return err
+		}
+		srf.Free()
+		dst := sdl.Rect{X: o.X, Y: o.Y, W: o.W, H: o.H}
+		return t.renderer.CopyEx(txt, nil, &dst, 0, nil, sdl.FLIP_NONE)
+	} else {
+		return xerrors.Errorf("font not found: %v", o.ID)
+	}
 }

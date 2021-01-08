@@ -8,13 +8,22 @@ type Factory struct {
 	creators map[string]Creator
 }
 
-var factory = NewFactory()
+var f = NewFactory()
+
+func init() {
+	Register("button", NewButton)
+	Register("player", NewPlayer)
+	Register("enemy", NewEnemy)
+	Register("animation", NewAnimation)
+	Register("background", NewBackground)
+	Register("text", NewText)
+}
 
 func NewFactory() *Factory {
 	return &Factory{creators: map[string]Creator{}}
 }
 
-func (f *Factory) Create(id string, s Properties) (GameObject, error) {
+func Create(id string, s Properties) (GameObject, error) {
 	if c, ok := f.creators[id]; ok {
 		return c(s), nil
 	} else {
@@ -22,14 +31,6 @@ func (f *Factory) Create(id string, s Properties) (GameObject, error) {
 	}
 }
 
-func (f *Factory) Register(id string, c Creator) {
-	f.creators[id] = c
-}
-
-func Create(id string, s Properties) (GameObject, error) {
-	return factory.Create(id, s)
-}
-
 func Register(id string, c Creator) {
-	factory.Register(id, c)
+	f.creators[id] = c
 }

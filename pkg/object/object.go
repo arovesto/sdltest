@@ -19,12 +19,7 @@ type GameObject interface {
 	Draw() error
 	Update() error
 	Destroy() error
-	Scroll(speed float64)
 	Collide() error
-	Updating() bool
-	Dead() bool
-	Dying() bool
-	StartUpdate(b bool)
 	GetPosition() math.Vector2D
 	GetSize() math.Vector2D
 	GetType() Type
@@ -37,7 +32,9 @@ type Properties struct {
 	Cols      int32
 	ID        string
 	AnimSpeed uint32
+	MaxSpeed  float64
 	Callback  global.ID
+	Flip      sdl.RendererFlip
 }
 
 type shooterObject struct {
@@ -45,6 +42,8 @@ type shooterObject struct {
 	vel  math.Vector2D
 	acc  math.Vector2D
 	size math.Vector2D
+
+	maxSpeed float64
 
 	alpha uint8
 	angle float64
@@ -75,16 +74,24 @@ type shooterObject struct {
 
 func newShooterObj(st Properties) shooterObject {
 	return shooterObject{
-		pos:    st.Pos,
-		size:   st.Size,
-		frames: st.Cols,
-		id:     st.ID,
-		alpha:  255,
+		pos:      st.Pos,
+		size:     st.Size,
+		frames:   st.Cols,
+		id:       st.ID,
+		alpha:    255,
+		flip:     st.Flip,
+		maxSpeed: st.MaxSpeed,
 	}
 }
 
 func (s *shooterObject) Update() error {
 	s.vel = math.Add(s.vel, s.acc)
+	if s.maxSpeed != 0 {
+		l := s.vel.Length()
+		if l > s.maxSpeed {
+			s.vel = math.Div(s.vel, l/s.maxSpeed)
+		}
+	}
 	s.pos = math.Add(s.pos, s.vel)
 	return nil
 }

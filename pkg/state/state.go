@@ -6,6 +6,8 @@ type State interface {
 	Update() error
 	Render() error
 	OnEnter() error
+	OnSwitch() error
+	OnContinue() error
 	OnExit() error
 	GetID() ID
 }

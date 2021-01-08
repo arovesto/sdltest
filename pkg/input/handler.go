@@ -1,6 +1,7 @@
 package input
 
 import (
+	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/math"
 	"github.com/veandco/go-sdl2/sdl"
@@ -51,7 +52,7 @@ func (h *Handler) GetMousePressed(id int) bool {
 }
 
 func (h *Handler) GetMousePosition() math.Vector2D {
-	return h.mousePos
+	return math.Sub(h.mousePos, camera.GetCamPos())
 }
 
 func (h *Handler) IsKeyDown(scancode sdl.Scancode) bool {

@@ -1,9 +1,10 @@
 package game
 
 import (
+	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/input"
-	"github.com/arovesto/sdl/pkg/object"
+	"github.com/arovesto/sdl/pkg/sound"
 	"github.com/arovesto/sdl/pkg/state"
 	"github.com/arovesto/sdl/pkg/texturemanager"
 	"github.com/veandco/go-sdl2/sdl"
@@ -55,16 +56,19 @@ func InitGame(opts Opts) error {
 		return err
 	}
 
-	if err = renderer.SetDrawColor(150, 0, 0, 255); err != nil {
+	if err = texturemanager.InitManager(renderer); err != nil {
 		return err
 	}
-	texturemanager.InitManager(renderer)
 
-	object.Register("button", object.NewButton)
-	object.Register("player", object.NewPlayer)
-	object.Register("enemy", object.NewEnemy)
-	object.Register("animation", object.NewAnimation)
-	object.Register("background", object.NewBackground)
+	if err = sound.Load("assets/heroes.flac", sound.MUSIC, "heroes"); err != nil {
+		return err
+	}
+	if err = sound.Load("assets/shot.wav", sound.SFX, "shot"); err != nil {
+		return err
+	}
+
+	camera.RegisterCam(camera.Opts{W: opts.Width, H: opts.Height, Type: camera.STATIONARY})
+	camera.RegisterCam(camera.Opts{W: opts.Width, H: opts.Height, Type: camera.MOVING})
 
 	machine := state.NewMachine()
 	if err := machine.PushState(state.Menu); err != nil {

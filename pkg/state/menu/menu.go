@@ -4,6 +4,7 @@ import (
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/object"
 	"github.com/arovesto/sdl/pkg/parser"
+	"github.com/arovesto/sdl/pkg/sound"
 	"github.com/arovesto/sdl/pkg/state"
 )
 
@@ -47,18 +48,26 @@ func (m *menu) Render() (err error) {
 	return
 }
 
+func (m *menu) OnSwitch() error {
+	return nil
+}
+
+func (m *menu) OnContinue() error {
+	return nil
+}
+
 func (m *menu) OnEnter() (err error) {
 	m.objects, err = parser.Parse(global.AssetsPath, stateID)
 	if err != nil {
 		return
 	}
 
-	object.SetCallbacks(m.objects, callbacks)
-
-	return nil
+	object.SetCallbacks(m.objects, callbacks, nil)
+	return sound.PlayMusic("heroes", -1)
 }
 
 func (m *menu) OnExit() (err error) {
+	sound.HaltMusic()
 	for _, o := range m.objects {
 		if err = o.Destroy(); err != nil {
 			return err

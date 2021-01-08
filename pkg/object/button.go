@@ -26,10 +26,13 @@ func NewButton(st Properties) GameObject {
 	return &button{shooterObject: newShooterObj(st), cID: st.Callback}
 }
 
-func SetCallbacks(obj []GameObject, clb []Callback) {
+func SetCallbacks(obj []GameObject, clb []Callback, tlb []TextCallback) {
 	for _, o := range obj {
 		if btn, ok := o.(*button); ok {
 			btn.c = clb[btn.cID]
+		}
+		if txt, ok := o.(*text); ok {
+			txt.c = tlb[txt.cID]
 		}
 	}
 }

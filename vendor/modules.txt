@@ -3,6 +3,7 @@
 github.com/veandco/go-sdl2/img
 github.com/veandco/go-sdl2/mix
 github.com/veandco/go-sdl2/sdl
+github.com/veandco/go-sdl2/ttf
 # golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 ## explicit
 golang.org/x/xerrors

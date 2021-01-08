@@ -9,6 +9,11 @@ func NewMachine() *Machine {
 }
 
 func (m *Machine) PushState(s State) error {
+	if len(m.states) != 0 {
+		if err := m.states[len(m.states)-1].OnSwitch(); err != nil {
+			return err
+		}
+	}
 	m.states = append(m.states, s)
 	return s.OnEnter()
 }
@@ -24,9 +29,14 @@ func (m *Machine) PopState() error {
 	if len(m.states) == 0 {
 		return nil
 	}
-	err := m.states[len(m.states)-1].OnExit()
+	if err := m.states[len(m.states)-1].OnExit(); err != nil {
+		return err
+	}
 	m.states = m.states[:len(m.states)-1]
-	return err
+	if len(m.states) == 0 {
+		return nil
+	}
+	return m.states[len(m.states)-1].OnContinue()
 }
 
 func (m *Machine) Update() error {

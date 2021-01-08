@@ -53,8 +53,16 @@ func (g *gameover) OnEnter() (err error) {
 		return
 	}
 
-	object.SetCallbacks(g.objects, callbacks)
+	object.SetCallbacks(g.objects, callbacks, nil)
 
+	return nil
+}
+
+func (g *gameover) OnSwitch() error {
+	return nil
+}
+
+func (g *gameover) OnContinue() error {
 	return nil
 }
 

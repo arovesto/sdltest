@@ -1,6 +1,7 @@
 package play
 
 import (
+	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/input"
 	"github.com/arovesto/sdl/pkg/level"
@@ -29,6 +30,10 @@ func (p *play) Update() (err error) {
 		}
 	}
 
+	if err = camera.Update(); err != nil {
+		return
+	}
+
 	for _, o := range p.objects {
 		if err = o.Update(); err != nil {
 			return
@@ -43,9 +48,19 @@ func (p *play) Render() (err error) {
 }
 
 func (p *play) OnEnter() (err error) {
-	//p.objects, err = parser.Parse(global.AssetsPath, stateID)
+	if err = camera.SwitchCam(1); err != nil {
+		return err
+	}
 	p.level, err = level.Parse(global.MapPath)
 	return
+}
+
+func (p *play) OnSwitch() error {
+	return camera.SwitchCam(0)
+}
+
+func (p *play) OnContinue() error {
+	return camera.SwitchCam(1)
 }
 
 func (p *play) OnExit() (err error) {
