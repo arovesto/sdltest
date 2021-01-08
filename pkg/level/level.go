@@ -5,6 +5,10 @@ type Level struct {
 	layers []Layer
 }
 
+func NewLevel(s []TileSet, l []Layer) *Level {
+	return &Level{sets: s, layers: l}
+}
+
 func (l *Level) Update() (err error) {
 	for _, l := range l.layers {
 		if err = l.Update(); err != nil {
@@ -24,13 +28,13 @@ func (l *Level) Render() (err error) {
 }
 
 type TileSet struct {
-	firstGID   int
-	tileWidth  int32
-	tileHeight int32
-	spacing    int32
-	margin     int32
-	w          int32
-	h          int32
-	cols       int32
-	name       string
+	FirstGID int
+	TWidth   int32
+	THeight  int32
+	Spacing  int32
+	Margin   int32
+	W        int32
+	H        int32
+	Cols     int32
+	Name     string
 }

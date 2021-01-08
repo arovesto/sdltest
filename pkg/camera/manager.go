@@ -19,15 +19,13 @@ type Opts struct {
 	H int32
 
 	ApproachSpeed float64
-
-	Type CamType
 }
 
 func RegisterCam(o Opts) {
 	if o.ApproachSpeed == 0 {
 		o.ApproachSpeed = 50
 	}
-	m.cams = append(m.cams, &camera{pos: math.NewVecInt(o.X, o.Y), basePos: math.NewVecInt(o.X, o.Y), size: math.NewVecInt(o.W, o.H), approachSpeed: o.ApproachSpeed, tp: o.Type})
+	m.cams = append(m.cams, &camera{pos: math.NewVecInt(o.X, o.Y), basePos: math.NewVecInt(o.X, o.Y), size: math.NewVecInt(o.W, o.H), approachSpeed: o.ApproachSpeed})
 }
 
 func GetCamPos() math.Vector2D {

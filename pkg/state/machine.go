@@ -1,9 +1,11 @@
 package state
 
 type Machine struct {
-	states []State
+	states     []State
+	onTopState []State
 }
 
+// TODO make this into a manager
 func NewMachine() *Machine {
 	return &Machine{}
 }
@@ -16,6 +18,11 @@ func (m *Machine) PushState(s State) error {
 	}
 	m.states = append(m.states, s)
 	return s.OnEnter()
+}
+
+// TODO implement "PushOnTop" mechanics here so can have menu above game, previous staff is drawn but not updated
+func (m *Machine) PushOnTop() error {
+	return nil
 }
 
 func (m *Machine) ChangeState(s State) error {

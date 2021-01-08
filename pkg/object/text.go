@@ -16,6 +16,7 @@ type text struct {
 type TextCallback func() (string, error)
 
 func NewText(st Properties) GameObject {
+	st.IgnoreCam = true
 	return &text{shooterObject: newShooterObj(st), cID: st.Callback}
 }
 

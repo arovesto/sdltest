@@ -64,3 +64,24 @@ func Collide(A, ASize, B, BSize Vector2D) bool {
 	bTop, bBottom, bLeft, bRight := B.Y, B.Y+BSize.Y, B.X, B.X+BSize.X
 	return aBottom >= bTop && aTop <= bBottom && aRight >= bLeft && aLeft <= bRight
 }
+
+func CollideMargin(A, ASize, B, BSize, Margin Vector2D) bool {
+	return Collide(Add(A, Margin), Sub(ASize, Margin), Add(B, Margin), Sub(BSize, Margin))
+}
+
+func CampDirection(A, B, C Vector2D) Vector2D {
+	if B.X > 0 && A.X > 0 {
+		A.X = 0
+	}
+	if C.X < 0 && A.X < 0 {
+		A.X = 0
+	}
+
+	if B.Y > 0 && A.Y > 0 {
+		A.Y = 0
+	}
+	if C.Y < 0 && A.Y < 0 {
+		A.Y = 0
+	}
+	return A
+}

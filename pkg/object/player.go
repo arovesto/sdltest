@@ -41,7 +41,7 @@ func (p *player) Update() (err error) {
 
 func (p *player) handleInput() error {
 	if input.IsKeyDown(sdl.SCANCODE_E) {
-		return global.GetMachine().ChangeState(state.GameOver)
+		global.Quit()
 	}
 	now := sdl.GetTicks()
 	if input.IsKeyDown(sdl.SCANCODE_SPACE) && now-p.shootAt > 1000 {
@@ -50,8 +50,11 @@ func (p *player) handleInput() error {
 		}
 		p.shootAt = now
 	}
+	if input.IsKeyDown(sdl.SCANCODE_W) {
+		p.vel.Y = -4
+	}
 
-	camera.GoTo(math.Add(p.pos, math.NewVec(200, -400)))
+	camera.GoTo(math.Add(p.pos, math.NewVec(200, -100)))
 	var player math.Vector2D
 	switch {
 	case input.IsKeyDown(sdl.SCANCODE_D):
@@ -77,15 +80,16 @@ func (p *player) GetType() Type {
 	return Player
 }
 
-func (p *player) Collide() error {
+func (p *player) Collide(other GameObject) {
+	_ = global.GetMachine().ChangeState(state.GameOver)
 	if p.invulnerable || global.LevelComplete() {
-		return nil
+		return
 	}
 	// TODO store this metadata in texture manager
-	p.id = "large-explosion"
-	p.size = math.NewVec(128, 128)
-	p.frame = 0
-	p.frames = 9
+	//p.id = "large-explosion"
+	//p.size = math.NewVec(128, 128)
+	//p.frame = 0
+	//p.frames = 9
 
-	return p.shooterObject.Collide()
+	p.shooterObject.Collide(other)
 }

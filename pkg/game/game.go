@@ -67,8 +67,7 @@ func InitGame(opts Opts) error {
 		return err
 	}
 
-	camera.RegisterCam(camera.Opts{W: opts.Width, H: opts.Height, Type: camera.STATIONARY})
-	camera.RegisterCam(camera.Opts{W: opts.Width, H: opts.Height, Type: camera.MOVING})
+	camera.RegisterCam(camera.Opts{W: opts.Width, H: opts.Height})
 
 	machine := state.NewMachine()
 	if err := machine.PushState(state.Menu); err != nil {

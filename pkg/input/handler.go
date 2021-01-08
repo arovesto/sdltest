@@ -7,7 +7,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var handler = &Handler{}
+var h = &Handler{}
 
 const (
 	LEFT = iota
@@ -21,7 +21,7 @@ type Handler struct {
 	keyboardState []uint8
 }
 
-func (h *Handler) Update() error {
+func Update() error {
 	h.keyboardState = sdl.GetKeyboardState()
 	for {
 		e := sdl.PollEvent()
@@ -47,53 +47,33 @@ func (h *Handler) Update() error {
 	}
 }
 
-func (h *Handler) GetMousePressed(id int) bool {
+func GetMousePressed(id int) bool {
 	return h.mousePressed[id]
 }
 
-func (h *Handler) GetMousePosition() math.Vector2D {
+func GetMousePosition() math.Vector2D {
+	return h.mousePos
+}
+
+func GetMousePositionInCamera() math.Vector2D {
 	return math.Sub(h.mousePos, camera.GetCamPos())
 }
 
-func (h *Handler) IsKeyDown(scancode sdl.Scancode) bool {
+func IsKeyDown(scancode sdl.Scancode) bool {
 	if h.keyboardState == nil {
 		return false
 	}
 	return h.keyboardState[scancode] == 1
 }
 
-func (h *Handler) Destroy() error {
-	return nil
-}
-
-func (h *Handler) ResetMouse() {
-	h.mousePressed = [3]bool{}
-}
-
-func GetHandler() *Handler {
-	return handler
-}
-
-func Update() error {
-	return handler.Update()
+func UpdateKeyboard() {
+	h.keyboardState = sdl.GetKeyboardState()
 }
 
 func Destroy() error {
-	return handler.Destroy()
-}
-
-func GetMousePressed(id int) bool {
-	return handler.GetMousePressed(id)
-}
-
-func GetMousePosition() math.Vector2D {
-	return handler.GetMousePosition()
-}
-
-func IsKeyDown(scancode sdl.Scancode) bool {
-	return handler.IsKeyDown(scancode)
+	return nil
 }
 
 func ResetMouse() {
-	handler.ResetMouse()
+	h.mousePressed = [3]bool{}
 }

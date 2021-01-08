@@ -23,6 +23,7 @@ type button struct {
 type Callback func() error
 
 func NewButton(st Properties) GameObject {
+	st.IgnoreCam = true
 	return &button{shooterObject: newShooterObj(st), cID: st.Callback}
 }
 

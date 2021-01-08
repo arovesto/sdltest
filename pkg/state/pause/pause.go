@@ -3,6 +3,8 @@ package pause
 import (
 	"fmt"
 
+	"github.com/veandco/go-sdl2/sdl"
+
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/input"
 	"github.com/arovesto/sdl/pkg/object"
@@ -35,20 +37,32 @@ var callbacks = []object.Callback{
 
 var textCallbacks = []object.TextCallback{
 	func() (string, error) {
-		return fmt.Sprintf("%.2f%% sound", float64(sound.GetVolume())/float64(mix.MAX_VOLUME)), nil
+		return fmt.Sprintf("sound %.2f%%", float64(sound.GetVolume())/float64(mix.MAX_VOLUME)), nil
 	},
 }
 
 type pause struct {
 	objects []object.GameObject
+
+	canPause uint32
 }
 
 func init() {
 	state.Pause = &pause{}
 }
 
-func (m *pause) Update() (err error) {
-	for _, o := range m.objects {
+func (p *pause) Update() (err error) {
+
+	if input.IsKeyDown(sdl.SCANCODE_ESCAPE) && p.canPause == 10 {
+		if err = global.GetMachine().PopState(); err != nil {
+			return
+		}
+	}
+	if p.canPause < 10 {
+		p.canPause++
+	}
+
+	for _, o := range p.objects {
 		if err = o.Update(); err != nil {
 			return
 		}
@@ -56,8 +70,8 @@ func (m *pause) Update() (err error) {
 	return
 }
 
-func (m *pause) Render() (err error) {
-	for _, o := range m.objects {
+func (p *pause) Render() (err error) {
+	for _, o := range p.objects {
 		if err = o.Draw(); err != nil {
 			return
 		}
@@ -65,13 +79,13 @@ func (m *pause) Render() (err error) {
 	return
 }
 
-func (m *pause) OnEnter() (err error) {
-	m.objects, err = parser.Parse(global.AssetsPath, stateID)
+func (p *pause) OnEnter() (err error) {
+	p.objects, err = parser.Parse(global.AssetsPath, stateID)
 	if err != nil {
 		return
 	}
 
-	object.SetCallbacks(m.objects, callbacks, textCallbacks)
+	object.SetCallbacks(p.objects, callbacks, textCallbacks)
 
 	return nil
 }
@@ -84,8 +98,9 @@ func (p *pause) OnContinue() error {
 	return nil
 }
 
-func (m *pause) OnExit() (err error) {
-	for _, o := range m.objects {
+func (p *pause) OnExit() (err error) {
+	p.canPause = 0
+	for _, o := range p.objects {
 		if err = o.Destroy(); err != nil {
 			return err
 		}
@@ -94,6 +109,6 @@ func (m *pause) OnExit() (err error) {
 	return
 }
 
-func (m *pause) GetID() state.ID {
+func (p *pause) GetID() state.ID {
 	return stateID
 }

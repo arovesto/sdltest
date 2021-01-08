@@ -1,9 +1,5 @@
 package object
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
-
 type animation struct {
 	shooterObject
 	animChanged uint32
@@ -11,17 +7,11 @@ type animation struct {
 }
 
 func NewAnimation(st Properties) GameObject {
+	st.IgnoreCam = true
 	return &animation{shooterObject: newShooterObj(st), animSpeed: st.AnimSpeed}
 }
 
 func (a *animation) Update() error {
-	now := sdl.GetTicks()
-	if now-a.animChanged > a.animSpeed {
-		a.frame += 1
-		if a.frame >= a.frames {
-			a.frame = 0
-		}
-		a.animChanged = now
-	}
-	return a.shooterObject.Update()
+	a.changeSprite()
+	return nil
 }

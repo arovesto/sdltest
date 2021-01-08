@@ -11,7 +11,7 @@
  <tileset firstgid="337" name="items" tilewidth="32" tileheight="32" tilecount="256" columns="16">
   <image source="items.png" trans="ffffff" width="512" height="512"/>
  </tileset>
- <objectgroup id="5" name="background">
+ <objectgroup id="5" name="background" visible="0">
   <object id="12" name="Background" type="background" x="0" y="0" width="1920" height="1088">
    <properties>
     <property name="frames" type="int" value="1"/>
@@ -20,8 +20,11 @@
   </object>
  </objectgroup>
  <layer id="1" name="background" width="120" height="34">
+  <properties>
+   <property name="collision" type="bool" value="true"/>
+  </properties>
   <data encoding="base64" compression="zlib">
-   eJzt27kNwkAQheFdqALcFg0gKkAUQw1AARwZUABHExwxBTCWCVYItF6MNWb4P+nJydoe6SUOxs7BspsnlgMAAABAR/453iqRttaAqKSbEPwe+v0P9AoAAAAAAAAAzbXSHgC1OmoPgFrRr230Gzf2RTTPfnoP/cbRbzPNJYsgS91xVFjudyfZBznojqPCer+ZL7rNr/Rry0lyDnJ5c65n+P+3q/YAFcT2oF/t3T3vRvflIQMD/U4k08TMVCYtr+PSdmXDZI9nDKXbkYF+15JNYrZffP8d3AOujg==
+   eJzt29sNgjAYhuGiUyhruYBxAnUYZxAH8HCnDuBhCQ/XDmAJkjQEAkWav9b3Sb4YG/Rv8t2gKUohZK+IhBwAAAAAMtLb8V6D9KU2iK8MLYLfQ7//gV4BAAAAAAAAwF876Q3Aqavg7FnJucqytXw9UXaBbL8uO6DfDP3WW0RZJK9t+xn6rUe/7bjud62zMbJ1OM9Xvt1fdSXt96RzNnJxN85bkv26lPcbR1m36Sv9hiPt96ZzN/KouHYU8PNvT8HZVb9pc+b7pLDWJGXn7opno8d6D5MA+l0q+/8HViI7bW6g7M7Kmok/3zHV3c4D6Hevc7DMscP5b3UpzKI=
   </data>
  </layer>
  <layer id="4" name="foreground" width="120" height="34">
@@ -30,18 +33,21 @@
   </data>
  </layer>
  <objectgroup id="2" name="objects">
-  <object id="7" name="Player" type="player" x="100" y="900" width="128" height="64">
+  <properties>
+   <property name="collision" type="bool" value="true"/>
+  </properties>
+  <object id="7" name="Player" type="player" x="696.97" y="928.788" width="128" height="64">
    <properties>
     <property name="frames" type="int" value="4"/>
-    <property name="maxSpeed" type="int" value="7"/>
     <property name="texture" value="tank"/>
+    <property name="xMaxSpeed" type="int" value="7"/>
    </properties>
   </object>
-  <object id="15" name="Enemy1" type="enemy" x="1584" y="575" width="128" height="64">
+  <object id="15" name="Enemy1" type="enemy" x="787.03" y="156.818" width="128" height="64">
    <properties>
     <property name="frames" type="int" value="4"/>
     <property name="texture" value="evil-tank"/>
-    <property name="maxSpeed" type="int" value="7"/>
+    <property name="xMaxSpeed" type="int" value="7"/>
    </properties>
   </object>
  </objectgroup>

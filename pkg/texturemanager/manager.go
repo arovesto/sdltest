@@ -52,17 +52,19 @@ func Load(opts LoadOpts) error {
 	return nil
 }
 
+// TODO add "ignore cam" option, for overlay menus
 type DrawOpts struct {
-	ID    string
-	X     int32
-	Y     int32
-	W     int32
-	H     int32
-	Row   int32
-	Col   int32
-	Flip  sdl.RendererFlip
-	Angle float64
-	Alpha uint8
+	ID        string
+	X         int32
+	Y         int32
+	W         int32
+	H         int32
+	Row       int32
+	Col       int32
+	Flip      sdl.RendererFlip
+	Angle     float64
+	Alpha     uint8
+	IgnoreCam bool
 }
 
 func Draw(opts DrawOpts) error {
@@ -71,6 +73,9 @@ func Draw(opts DrawOpts) error {
 	}
 	if texture, ok := t.textureMap[opts.ID]; ok {
 		camX, camY := camera.GetCamPos().IntPos()
+		if opts.IgnoreCam {
+			camX, camY = 0, 0
+		}
 		src := sdl.Rect{X: opts.W * opts.Col, Y: opts.H * opts.Row, W: opts.W, H: opts.H}
 		dst := sdl.Rect{X: opts.X - camX, Y: opts.Y - camY, W: opts.W, H: opts.H}
 		if err := texture.SetAlphaMod(opts.Alpha); err != nil {
@@ -99,14 +104,13 @@ func DrawTile(opts DrawTileOpts) error {
 		return errors.New("manager not initialized")
 	}
 	if texture, ok := t.textureMap[opts.ID]; ok {
-		camX, camY := camera.GetCamPos().IntPos()
 		src := sdl.Rect{
 			X: opts.Margin + (opts.Spacing+opts.W)*opts.Col,
 			Y: opts.Margin + (opts.Spacing+opts.H)*opts.Row,
 			W: opts.W,
 			H: opts.H,
 		}
-		dst := sdl.Rect{X: opts.X - camX, Y: opts.Y - camY, W: opts.W, H: opts.H}
+		dst := sdl.Rect{X: opts.X, Y: opts.Y, W: opts.W, H: opts.H}
 		return t.renderer.CopyEx(texture, &src, &dst, 0, nil, sdl.FLIP_NONE)
 	} else {
 		return xerrors.Errorf("texture not found: %v", opts.ID)

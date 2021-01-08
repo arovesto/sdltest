@@ -21,10 +21,9 @@ const (
 // Now on "scrolling background" of 8 chapter
 func main() {
 	err := game.InitGame(game.Opts{
-		Height:     1088, // 34
-		Width:      1920, // 60
-		Title:      "sdlgame",
-		Fullscreen: true,
+		Height: 1088, // 34
+		Width:  1920, // 60
+		Title:  "sdlgame",
 	})
 	if err != nil {
 		panic(err)

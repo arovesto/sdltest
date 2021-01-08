@@ -1,4 +1,4 @@
-package level
+package parser
 
 import (
 	"bytes"
@@ -10,6 +10,9 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+
+	"github.com/arovesto/sdl/pkg/collision"
+	"github.com/arovesto/sdl/pkg/level"
 
 	"github.com/arovesto/sdl/pkg/math"
 	"github.com/arovesto/sdl/pkg/object"
@@ -46,21 +49,28 @@ type Format struct {
 		} `xml:"image"`
 	} `xml:"tileset"`
 	Nodes []struct {
-		XMLName xml.Name
-		Objects []Object `xml:"object"`
-		Data    string   `xml:"data"`
+		XMLName    xml.Name
+		Objects    []LevelObject `xml:"object"`
+		Data       string        `xml:"data"`
+		Properties struct {      // TODO store additional pngs in properties like "texture-..."
+			Property []struct {
+				Name  string `xml:"name,attr"`
+				Type  string `xml:"type,attr"`
+				Value string `xml:"value,attr"`
+			} `xml:"property"`
+		} `xml:"properties"`
 	} `xml:",any"`
 }
 
-type Object struct {
+type LevelObject struct {
 	XMLName    xml.Name `xml:"object"`
 	Name       string   `xml:"name,attr"`
 	Type       string   `xml:"type,attr"`
-	X          int32    `xml:"x,attr"`
-	Y          int32    `xml:"y,attr"`
-	Width      int32    `xml:"width,attr"`
-	Height     int32    `xml:"height,attr"`
-	Properties struct { // TODO store additional pngs in properties like "texture-..."
+	X          float64  `xml:"x,attr"`
+	Y          float64  `xml:"y,attr"`
+	Width      float64  `xml:"width,attr"`
+	Height     float64  `xml:"height,attr"`
+	Properties struct {
 		Property []struct {
 			Name  string `xml:"name,attr"`
 			Type  string `xml:"type,attr"`
@@ -69,7 +79,8 @@ type Object struct {
 	} `xml:"properties"`
 }
 
-func Parse(name string) (*Level, error) {
+func ParseLevel(name string) (*level.Level, error) {
+	collision.Clear()
 	contents, err := ioutil.ReadFile(name)
 	if err != nil {
 		return nil, err
@@ -78,7 +89,7 @@ func Parse(name string) (*Level, error) {
 	if err = xml.Unmarshal(contents, &format); err != nil {
 		return nil, err
 	}
-	var tileSets []TileSet
+	var tileSets []level.TileSet
 
 	for _, t := range format.Props.Properties {
 		if err = texturemanager.Load(texturemanager.LoadOpts{Path: global.GetAssetsPath(t.Value), ID: t.Name}); err != nil {
@@ -93,26 +104,32 @@ func Parse(name string) (*Level, error) {
 		}); err != nil {
 			return nil, err
 		}
-		tileSets = append(tileSets, TileSet{
-			firstGID:   s.FirstGID,
-			tileWidth:  s.TileWidth,
-			tileHeight: s.TileHeight,
-			spacing:    s.Spacing,
-			margin:     s.Margin,
-			w:          s.Image.Width,
-			h:          s.Image.Height,
-			cols:       s.Columns,
-			name:       s.Name,
+		tileSets = append(tileSets, level.TileSet{
+			FirstGID: s.FirstGID,
+			TWidth:   s.TileWidth,
+			THeight:  s.TileHeight,
+			Spacing:  s.Spacing,
+			Margin:   s.Margin,
+			W:        s.Image.Width,
+			H:        s.Image.Height,
+			Cols:     s.Columns,
+			Name:     s.Name,
 		})
 	}
 
-	var layers []Layer
+	var layers []level.Layer
 	for _, n := range format.Nodes {
+		c := false
+		for _, p := range n.Properties.Property {
+			if p.Name == "collision" {
+				c = true
+			}
+		}
 		switch n.XMLName.Local {
 		case "objectgroup":
 			var objects []object.GameObject
 			for _, o := range n.Objects {
-				state := object.Properties{Pos: math.NewVecInt(o.X, o.Y), Size: math.NewVecInt(o.Width, o.Height), ID: o.Name}
+				state := object.Properties{Pos: math.NewVec(o.X, o.Y), Size: math.NewVec(o.Width, o.Height), ID: o.Name}
 				for _, p := range o.Properties.Property {
 					switch p.Name {
 					case "frames":
@@ -123,23 +140,28 @@ func Parse(name string) (*Level, error) {
 						state.Callback = global.ID(mustInt(p.Value))
 					case "animSpeed":
 						state.AnimSpeed = uint32(mustInt(p.Value))
-					case "maxSpeed":
-						state.MaxSpeed = mustFloat(p.Value)
+					case "xMaxSpeed":
+						state.XMaxSpeed = mustFloat(p.Value)
+					case "yMaxSpeed":
+						state.YMaxSpeed = mustFloat(p.Value)
 					}
 				}
 				if obj, err := object.Create(o.Type, state); err == nil {
 					objects = append(objects, obj)
+					if c {
+						collision.RegisterObject(obj)
+					}
 				} else {
 					return nil, err
 				}
 			}
-			layers = append(layers, NewObjectLayer(objects))
+			layers = append(layers, level.NewObjectLayer(objects))
 		case "layer":
 			data, err := base64.StdEncoding.DecodeString(strings.TrimSpace(n.Data))
 			if err != nil {
 				return nil, err
 			}
-			m := make(Tiles, format.Height)
+			m := make(level.Tiles, format.Height)
 			for i := range m {
 				m[i] = make([]int, format.Width)
 			}
@@ -158,10 +180,15 @@ func Parse(name string) (*Level, error) {
 					m[row][col] = ids[row*format.Width+col]
 				}
 			}
-			layers = append(layers, NewTileLayer(format.TileWidth, tileSets, m))
+
+			layer := level.NewTileLayer(format.TileWidth, tileSets, m, c)
+			layers = append(layers, layer)
+			if c {
+				collision.RegisterTileLayer(layer)
+			}
 		}
 	}
-	return &Level{sets: tileSets, layers: layers}, nil
+	return level.NewLevel(tileSets, layers), nil
 }
 
 func readInts(r io.Reader) (ids []int, err error) {
