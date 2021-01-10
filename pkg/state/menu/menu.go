@@ -8,10 +8,6 @@ import (
 	"github.com/arovesto/sdl/pkg/state"
 )
 
-const (
-	stateID = 0
-)
-
 var callbacks = []object.Callback{
 	func() error {
 		return global.GetMachine().ChangeState(state.Play)
@@ -57,7 +53,7 @@ func (m *menu) OnContinue() error {
 }
 
 func (m *menu) OnEnter() (err error) {
-	m.objects, err = parser.Parse(global.AssetsPath, stateID)
+	m.objects, err = parser.Parse(global.MenusPath, "menu")
 	if err != nil {
 		return
 	}
@@ -74,8 +70,4 @@ func (m *menu) OnExit() (err error) {
 		}
 	}
 	return
-}
-
-func (m *menu) GetID() state.ID {
-	return stateID
 }

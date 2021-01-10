@@ -2,14 +2,12 @@ package level
 
 import (
 	"github.com/arovesto/sdl/pkg/camera"
-	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/math"
 	"github.com/arovesto/sdl/pkg/object"
-	"github.com/arovesto/sdl/pkg/texturemanager"
 )
 
 const (
-	margin = 3
+	margin = 5
 )
 
 type Layer interface {
@@ -20,43 +18,32 @@ type Layer interface {
 type Tiles [][]int
 
 type TileLayer struct {
-	cols     int32
-	rows     int32
 	tileSize int32
 
-	sets  []TileSet
+	sets  []*TileSet
 	tiles Tiles
 
 	collision bool
 }
 
-func NewTileLayer(tileSize int32, set []TileSet, tiles Tiles, collision bool) *TileLayer {
-	w, h := global.GetSize()
-	return &TileLayer{sets: set, tiles: tiles, tileSize: tileSize, cols: w/tileSize + 1, rows: h/tileSize + 1, collision: collision}
+func NewTileLayer(tileSize int32, set []*TileSet, tiles Tiles, collision bool) *TileLayer {
+	return &TileLayer{sets: set, tiles: tiles, tileSize: tileSize, collision: collision}
 }
 
 func (l *TileLayer) Render() (err error) {
-	xCam, yCam := camera.GetCamPos().IntPos()
+	xCam, yCam, w, h := camera.Camera.GetRect().Values()
+	cols, rows := w/l.tileSize+1, h/l.tileSize+1
 	x, y := xCam/l.tileSize, yCam/l.tileSize
 	x2, y2 := xCam%l.tileSize, yCam%l.tileSize
-	for i := int32(0); i < l.rows; i++ {
-		for j := int32(0); j < l.cols; j++ {
+	for i := int32(0); i < rows; i++ {
+		for j := int32(0); j < cols; j++ {
 			if l.outside(j+x, i+y) {
 				continue
 			}
 			id := l.tiles[i+y][j+x]
 			ts := l.getTileSetByID(id)
-			if err = texturemanager.DrawTile(texturemanager.DrawTileOpts{
-				ID:      ts.Name,
-				Spacing: ts.Spacing,
-				Margin:  ts.Margin,
-				X:       (j * l.tileSize) - x2,
-				Y:       (i * l.tileSize) - y2,
-				W:       l.tileSize,
-				H:       l.tileSize,
-				Row:     int32(id-ts.FirstGID) / ts.Cols,
-				Col:     int32(id-ts.FirstGID) % ts.Cols,
-			}); err != nil {
+			if err = ts.Draw(math.NewIntVector((j*l.tileSize)-x2, (i*l.tileSize)-y2),
+				math.NewIntVector(int32(id-ts.FirstGID)%ts.Cols, int32(id-ts.FirstGID)/ts.Cols)); err != nil {
 				return
 			}
 		}
@@ -73,12 +60,11 @@ func (l *TileLayer) outside(b, a int32) bool {
 }
 
 func (l *TileLayer) BackOffVector(o object.GameObject) (isGroundedPositive, isGroundedNegative, delta math.Vector2D) {
-	// TODO refactor me
-	xP, yP := o.GetPosition().IntPos()
-	x, y := xP/l.tileSize, yP/l.tileSize
-	wP, hP := o.GetSize().IntPos()
-	w, h := math.DivRoundUp(wP, l.tileSize)+2, math.DivRoundUp(hP, l.tileSize)+2
+	xP, yP, wP, hP := o.GetCollider().Values()
 
+	// TODO refactor me
+	x, y := xP/l.tileSize, yP/l.tileSize
+	w, h := math.DivRoundUp(wP, l.tileSize)+2, math.DivRoundUp(hP, l.tileSize)+2
 	for i := x - 2; i <= w+x; i++ {
 		for j := y - 2; j <= h+y; j++ {
 			if !l.outside(i, j) && l.tiles[j][i] != 0 {
@@ -104,7 +90,7 @@ func (l *TileLayer) BackOffVector(o object.GameObject) (isGroundedPositive, isGr
 	return
 }
 
-func (l *TileLayer) getTileSetByID(id int) TileSet {
+func (l *TileLayer) getTileSetByID(id int) *TileSet {
 	for i := 0; i < len(l.sets)-1; i++ {
 		if id >= l.sets[i].FirstGID && id < l.sets[i+1].FirstGID {
 			return l.sets[i]
@@ -139,34 +125,37 @@ func (o *objectLayer) Update() (err error) {
 	return
 }
 
-/*
-	for i := x - 2; i <= w+x; i++ {
-		for j := y - 2; j <= h+y; j++ {
-			if i == 5 && j == 24 {
-				log.Println(xP, xP+wP, yP, yP+hP, x, x+w, y, y+h)
-			}
-			if !l.outside(i, j) && l.tiles[j][i] != 0 {
-				if math.Abs(j*l.tileSize-yP-hP) <= margin && xP <= (i+1)*l.tileSize && xP+wP >= i*l.tileSize {
-					isGrounded.Y = 1
-					log.Println(i, j)
-					delta.Y = float64(j*l.tileSize - yP - hP)
+type collisionLayer struct {
+	tileLayers []*TileLayer
+	objects    []object.GameObject
+}
+
+func NewCollisionLayer(obj []object.GameObject, tl []*TileLayer) *collisionLayer {
+	return &collisionLayer{objects: obj, tileLayers: tl}
+}
+
+func (c *collisionLayer) Update() (err error) {
+	for _, o := range c.objects {
+		for _, tl := range c.tileLayers {
+			o.BackOff(tl.BackOffVector(o))
+		}
+	}
+
+	for _, o1 := range c.objects {
+		for _, o2 := range c.objects {
+			if o1 != o2 && math.Collide(o1.GetObjectCollider(), o2.GetObjectCollider()) {
+				if err = o1.Collide(o2); err != nil {
+					return
 				}
-				if math.Abs(i*l.tileSize-xP-wP) <= margin && yP <= (j+1)*l.tileSize && yP+hP >= j*l.tileSize {
-					isGrounded.X = 1
-					log.Println(i, j)
-					delta.X = float64(i*l.tileSize - xP - wP)
-				}
-				if math.Abs(xP-(i+1)*l.tileSize) <= margin && yP <= (j+1)*l.tileSize && yP+hP >= j*l.tileSize {
-					isGrounded.X = -1
-					log.Println(i, j)
-					delta.X = float64((i+1)*l.tileSize - xP)
-				}
-				if math.Abs(yP-(j+1)*l.tileSize) <= margin && xP <= (i+1)*l.tileSize && xP+wP >= i*l.tileSize {
-					isGrounded.Y = -1
-					log.Println(i, j)
-					delta.Y = float64((j+1)*l.tileSize - yP)
+				if err = o2.Collide(o1); err != nil {
+					return
 				}
 			}
 		}
 	}
-*/
+	return
+}
+
+func (c *collisionLayer) Render() error {
+	return nil
+}

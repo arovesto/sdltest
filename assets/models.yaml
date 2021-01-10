@@ -1,0 +1,42 @@
+background:
+  parts:
+    - frames: 1
+    - frames: 1
+  collider:
+    w: 1920
+    h: 1088
+  texture_path: "assets/background.png"
+  ignore_cam: true
+tank:
+  parts:
+    - frames: 3
+      on_texture:
+        y: 8
+        w: 128
+        h: 56
+      on_model:
+        y: 8
+        w: 128
+        h: 56
+  texture_path: "assets/tank.png"
+  collider:
+    y: 8
+    w: 128
+    h: 56
+evil_tank:
+  parts:
+    - frames: 3
+      on_texture:
+        y: 8
+        w: 128
+        h: 56
+      on_model:
+        y: 8
+        w: 128
+        h: 56
+  texture_path: "assets/evil-tank.png"
+  render_flip: 1
+  collider:
+    y: 8
+    w: 128
+    h: 56

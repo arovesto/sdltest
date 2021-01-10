@@ -4,10 +4,11 @@ import (
 	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/input"
+	"github.com/arovesto/sdl/pkg/math"
 	"github.com/arovesto/sdl/pkg/sound"
 	"github.com/arovesto/sdl/pkg/state"
-	"github.com/arovesto/sdl/pkg/texturemanager"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
 
 	_ "github.com/arovesto/sdl/pkg/state/gameover"
 	_ "github.com/arovesto/sdl/pkg/state/menu"
@@ -21,13 +22,14 @@ type Game struct {
 	running  bool
 	states   *state.Machine
 
-	scrollSpeed float64
 	playerLives int
 
 	levelComplete bool
 	level         int
 
-	opts Opts
+	fullscreen bool
+	w          int32
+	h          int32
 }
 
 type Opts struct {
@@ -35,48 +37,53 @@ type Opts struct {
 	Width      int32
 	Fullscreen bool
 	Title      string
+	CamSpeedX  float64
+	CamSpeedY  float64
 }
 
-func InitGame(opts Opts) error {
+func InitGame(opts Opts) (*Game, error) {
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		return err
+		return nil, err
+	}
+	if err := ttf.Init(); err != nil {
+		return nil, err
 	}
 
 	sdlOpts := sdl.WINDOW_SHOWN
 	if opts.Fullscreen {
-		sdlOpts |= sdl.WINDOW_FULLSCREEN
+		sdlOpts |= sdl.WINDOW_FULLSCREEN_DESKTOP
 	}
 	window, err := sdl.CreateWindow(opts.Title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, opts.Width, opts.Height, uint32(sdlOpts))
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	camera.Camera = camera.NewCamera(opts.Width, opts.Height, math.NewVec(opts.CamSpeedX, opts.CamSpeedY))
 
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err = texturemanager.InitManager(renderer); err != nil {
-		return err
-	}
+	global.Renderer = renderer
 
 	if err = sound.Load("assets/heroes.flac", sound.MUSIC, "heroes"); err != nil {
-		return err
+		return nil, err
 	}
 	if err = sound.Load("assets/shot.wav", sound.SFX, "shot"); err != nil {
-		return err
+		return nil, err
 	}
-
-	camera.RegisterCam(camera.Opts{W: opts.Width, H: opts.Height})
 
 	machine := state.NewMachine()
 	if err := machine.PushState(state.Menu); err != nil {
-		return err
+		return nil, err
 	}
+	w, h := window.GetSize()
 
-	global.SetGame(&Game{renderer: renderer, window: window, running: true, states: machine, opts: opts, scrollSpeed: 5})
+	g := &Game{renderer: renderer, window: window, running: true, states: machine, fullscreen: opts.Fullscreen, w: w, h: h}
+	global.SetGame(g)
 
-	return nil
+	return g, nil
 }
 
 func (g *Game) Render() (err error) {
@@ -108,7 +115,6 @@ func (g *Game) Destroy() {
 	_ = g.window.Destroy()
 	_ = g.renderer.Clear()
 	_ = g.renderer.Destroy()
-	_ = texturemanager.Destroy()
 	_ = input.Destroy()
 }
 
@@ -121,27 +127,17 @@ func (g *Game) GetMachine() *state.Machine {
 }
 
 func (g *Game) GetSize() (int32, int32) {
-	return g.opts.Width, g.opts.Height
+	return g.w, g.h
 }
 
-func (g *Game) GetScrollSpeed() float64 {
-	return g.scrollSpeed
-}
+func (g *Game) ToggleFullscreen() error {
+	g.fullscreen = !g.fullscreen
 
-func (g *Game) DecreasePlayerLives() {
-	g.playerLives--
-}
-
-func (g *Game) GetPlayerLives() int {
-	return g.playerLives
-}
-
-func (g *Game) IncreaseLevel() error {
-	g.level++
-	g.levelComplete = false
-	return g.states.ChangeState(state.Between)
-}
-
-func (g *Game) LevelComplete() bool {
-	return g.levelComplete
+	var o uint32
+	if g.fullscreen {
+		o = sdl.WINDOW_FULLSCREEN_DESKTOP
+	}
+	err := g.window.SetFullscreen(o)
+	g.w, g.h = g.window.GetSize()
+	return err
 }

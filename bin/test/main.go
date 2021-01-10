@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 
-	"github.com/arovesto/sdl/pkg/game/global"
-
 	"github.com/arovesto/sdl/pkg/game"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -20,24 +18,26 @@ const (
 
 // Now on "scrolling background" of 8 chapter
 func main() {
-	err := game.InitGame(game.Opts{
-		Height: 1088, // 34
-		Width:  1920, // 60
-		Title:  "sdlgame",
+	g, err := game.InitGame(game.Opts{
+		Height:    1080, // 34
+		Width:     1920, // 60
+		CamSpeedX: 50,
+		CamSpeedY: 50,
+		Title:     "sdlgame",
 	})
 	if err != nil {
 		panic(err)
 	}
-	defer global.Destroy()
-	for global.Running() {
+	defer g.Destroy()
+	for g.Running() {
 		frameStart := sdl.GetTicks()
-		if err := global.HandleEvents(); err != nil {
+		if err := g.HandleEvents(); err != nil {
 			panic(err)
 		}
-		if err := global.Update(); err != nil {
+		if err := g.Update(); err != nil {
 			panic(err)
 		}
-		if err := global.Render(); err != nil {
+		if err := g.Render(); err != nil {
 			panic(err)
 		}
 		delayRequired := PerFrameTime - (sdl.GetTicks() - frameStart)

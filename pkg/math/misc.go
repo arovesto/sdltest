@@ -1,5 +1,7 @@
 package math
 
+import "github.com/veandco/go-sdl2/sdl"
+
 func DivIfCan(a, b int32) int32 {
 	absA, absB := Abs(a), Abs(b)
 	if absA > absB {
@@ -55,4 +57,12 @@ func LineBetween(y, yP, leftMargin, rightMargin int32) bool {
 	} else {
 		return y-yP <= leftMargin
 	}
+}
+
+func SDLRect(r Rect) *sdl.Rect {
+	return &sdl.Rect{X: r.X, Y: r.Y, W: r.W, H: r.H}
+}
+
+func SDLPoint(v IntVector) *sdl.Point {
+	return &sdl.Point{X: v.X, Y: v.Y}
 }

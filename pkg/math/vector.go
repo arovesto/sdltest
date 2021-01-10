@@ -9,12 +9,12 @@ type Vector2D struct {
 	Y float64
 }
 
-func NewVec(X, Y float64) Vector2D {
-	return Vector2D{X: X, Y: Y}
+func NewVec(x, y float64) Vector2D {
+	return Vector2D{X: x, Y: y}
 }
 
-func NewVecInt(X, Y int32) Vector2D {
-	return NewVec(float64(X), float64(Y))
+func NewVecInt(x, y int32) Vector2D {
+	return NewVec(float64(x), float64(y))
 }
 
 func ZeroVec() Vector2D {
@@ -25,63 +25,131 @@ func (v Vector2D) IntPos() (int32, int32) {
 	return int32(v.X), int32(v.Y)
 }
 
+func (v Vector2D) IntVector() IntVector {
+	return NewIntVector(v.IntPos())
+}
+
 func (v Vector2D) Length() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
 func (v Vector2D) Normalized() Vector2D {
-	return Div(v, v.Length())
+	return v.Div(v.Length())
 }
 
-func Add(v1, v2 Vector2D) Vector2D {
-	return Vector2D{X: v1.X + v2.X, Y: v1.Y + v2.Y}
+func (v Vector2D) Add(v2 Vector2D) Vector2D {
+	return Vector2D{X: v.X + v2.X, Y: v.Y + v2.Y}
 }
 
-func Mul(v Vector2D, c float64) Vector2D {
+func (v Vector2D) Mul(c float64) Vector2D {
 	return Vector2D{X: v.X * c, Y: v.Y * c}
 }
 
-func Sub(from, which Vector2D) Vector2D {
-	return Vector2D{X: from.X - which.X, Y: from.Y - which.Y}
+func (v Vector2D) Sub(which Vector2D) Vector2D {
+	return Vector2D{X: v.X - which.X, Y: v.Y - which.Y}
 }
 
-func Div(v Vector2D, c float64) Vector2D {
+func (v Vector2D) Div(c float64) Vector2D {
 	return Vector2D{X: v.X / c, Y: v.Y / c}
 }
 
-/*
-   A*----------------+
-    |      *B        |
-    |                |
-    +----------------*C
-*/
-func Inside(A, B, C Vector2D) bool {
-	return A.X < B.X && B.X < C.X && A.Y < B.Y && B.Y < C.Y
+func (v Vector2D) DivComponents(other Vector2D) Vector2D {
+	return Vector2D{X: v.X / other.X, Y: v.Y / other.Y}
 }
 
-func Collide(A, ASize, B, BSize Vector2D) bool {
-	aTop, aBottom, aLeft, aRight := A.Y, A.Y+ASize.Y, A.X, A.X+ASize.X
-	bTop, bBottom, bLeft, bRight := B.Y, B.Y+BSize.Y, B.X, B.X+BSize.X
+func Near(a, b, distance Vector2D) bool {
+	return AbsF(a.X-b.X) <= distance.X && AbsF(a.Y-b.Y) <= distance.Y
+}
+
+/*
+   a*----------------+
+    |      *b        |
+    |                |
+    +----------------*c
+*/
+func Inside(a, b, c Vector2D) bool {
+	return a.X < b.X && b.X < c.X && a.Y < b.Y && b.Y < c.Y
+}
+
+func InsideRect(r Rect, p IntVector) bool {
+	return r.X < p.X && p.X < r.X+r.W && r.Y < p.Y && p.Y < r.Y+r.H
+}
+
+func Collide(a, b Rect) bool {
+	aTop, aBottom, aLeft, aRight := a.Y, a.Y+a.H, a.X, a.X+a.W
+	bTop, bBottom, bLeft, bRight := b.Y, b.Y+b.H, b.X, b.X+b.W
 	return aBottom >= bTop && aTop <= bBottom && aRight >= bLeft && aLeft <= bRight
 }
 
-func CollideMargin(A, ASize, B, BSize, Margin Vector2D) bool {
-	return Collide(Add(A, Margin), Sub(ASize, Margin), Add(B, Margin), Sub(BSize, Margin))
+func ClampDirection(a, b, c Vector2D) Vector2D {
+	if b.X > 0 && a.X > 0 {
+		a.X = 0
+	}
+	if c.X < 0 && a.X < 0 {
+		a.X = 0
+	}
+
+	if b.Y > 0 && a.Y > 0 {
+		a.Y = 0
+	}
+	if c.Y < 0 && a.Y < 0 {
+		a.Y = 0
+	}
+	return a
 }
 
-func CampDirection(A, B, C Vector2D) Vector2D {
-	if B.X > 0 && A.X > 0 {
-		A.X = 0
-	}
-	if C.X < 0 && A.X < 0 {
-		A.X = 0
-	}
+type IntVector struct {
+	X int32 `yaml:"x"`
+	Y int32 `yaml:"y"`
+}
 
-	if B.Y > 0 && A.Y > 0 {
-		A.Y = 0
-	}
-	if C.Y < 0 && A.Y < 0 {
-		A.Y = 0
-	}
-	return A
+func (v IntVector) Add(other IntVector) IntVector {
+	return IntVector{X: v.X + other.X, Y: v.Y + other.Y}
+}
+
+func (v IntVector) Sub(other IntVector) IntVector {
+	return IntVector{X: v.X - other.X, Y: v.Y - other.Y}
+}
+
+func (v IntVector) Values() (int32, int32) {
+	return v.X, v.Y
+}
+
+func (v IntVector) FloatV() Vector2D {
+	return Vector2D{X: float64(v.X), Y: float64(v.Y)}
+}
+
+func NewIntVector(x, y int32) IntVector {
+	return IntVector{X: x, Y: y}
+}
+
+type Rect struct {
+	X int32 `yaml:"x"`
+	Y int32 `yaml:"y"`
+	W int32 `yaml:"w"`
+	H int32 `yaml:"h"`
+}
+
+func (r Rect) GetPos() IntVector {
+	return IntVector{X: r.X, Y: r.Y}
+}
+
+func (r Rect) GetSize() IntVector {
+	return IntVector{X: r.W, Y: r.H}
+}
+
+func (r Rect) Values() (int32, int32, int32, int32) {
+	return r.X, r.Y, r.W, r.H
+}
+
+func NewRect(a, size IntVector) Rect {
+	return Rect{X: a.X, Y: a.Y, W: size.X, H: size.Y}
+}
+
+func (r Rect) Add(v IntVector) Rect {
+	return NewRect(r.GetPos().Add(v), r.GetSize())
+}
+
+func (r Rect) Empty() bool {
+	return r.X == 0 && r.Y == 0 && r.W == 0 && r.H == 0
 }

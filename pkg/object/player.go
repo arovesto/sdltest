@@ -17,22 +17,16 @@ const (
 type player struct {
 	shooterObject
 
-	invulnerable        bool
-	invulnerableTime    int
-	invulnerableCounter int
-
-	alpha int
-	angle float64
-
 	shootAt uint32
 }
 
 func NewPlayer(st Properties) GameObject {
-	return &player{shooterObject: newShooterObj(st)}
+	p := &player{shooterObject: newShooterObj(st)}
+	MainPlayer = p
+	return p
 }
 
 func (p *player) Update() (err error) {
-	p.changeSprite()
 	if err = p.handleInput(); err != nil {
 		return err
 	}
@@ -44,7 +38,7 @@ func (p *player) handleInput() error {
 		global.Quit()
 	}
 	now := sdl.GetTicks()
-	if input.IsKeyDown(sdl.SCANCODE_SPACE) && now-p.shootAt > 1000 {
+	if input.IsKeyDown(sdl.SCANCODE_SPACE) && now-p.shootAt > 500 {
 		if err := sound.PlaySound("shot", 0); err != nil {
 			return err
 		}
@@ -54,21 +48,23 @@ func (p *player) handleInput() error {
 		p.vel.Y = -4
 	}
 
-	camera.GoTo(math.Add(p.pos, math.NewVec(200, -100)))
+	camera.Camera.MainTarget = p.pos.Add(math.NewVec(200, 1000*p.acc.Y))
 	var player math.Vector2D
 	switch {
 	case input.IsKeyDown(sdl.SCANCODE_D):
-		player.X = 0.05
-		p.flip = sdl.FLIP_NONE
+		player.X = 0.1
+		p.changeSprite()
+		p.model.Flip = sdl.FLIP_NONE
 	case input.IsKeyDown(sdl.SCANCODE_A):
-		player.X = -0.05
-		p.flip = sdl.FLIP_HORIZONTAL
+		player.X = -0.1
+		p.changeSprite()
+		p.model.Flip = sdl.FLIP_HORIZONTAL
 	default:
 	}
 
-	friction := math.Mul(p.vel, -0.1)
+	friction := p.vel.Mul(-0.1)
 	if player.X == 0 || (friction.X > 0) == (player.X > 0) {
-		p.acc = math.Add(friction, player)
+		p.acc = friction.Add(player)
 	} else {
 		p.acc = player
 	}
@@ -77,19 +73,9 @@ func (p *player) handleInput() error {
 }
 
 func (p *player) GetType() Type {
-	return Player
+	return PlayerType
 }
 
-func (p *player) Collide(other GameObject) {
-	_ = global.GetMachine().ChangeState(state.GameOver)
-	if p.invulnerable || global.LevelComplete() {
-		return
-	}
-	// TODO store this metadata in texture manager
-	//p.id = "large-explosion"
-	//p.size = math.NewVec(128, 128)
-	//p.frame = 0
-	//p.frames = 9
-
-	p.shooterObject.Collide(other)
+func (p *player) Collide(other GameObject) error {
+	return global.GetMachine().ChangeState(state.GameOver)
 }

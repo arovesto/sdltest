@@ -3,16 +3,29 @@ package global
 import (
 	"path"
 
+	"github.com/veandco/go-sdl2/sdl"
+
 	"github.com/arovesto/sdl/pkg/state"
 )
 
 type ID int
 
+var curID ID
+
+func NewID() ID {
+	r := curID
+	curID++
+	return r
+}
+
 const (
 	MapPath    = "assets/map.tmx"
-	AssetsPath = "assets/game.yaml"
+	ModelsPath = "assets/models.yaml"
+	MenusPath  = "assets/menus.yaml"
 	AssetsDir  = "assets"
 )
+
+var Renderer *sdl.Renderer
 
 func GetAssetsPath(name string) string {
 	return path.Join(AssetsDir, name)
@@ -20,44 +33,15 @@ func GetAssetsPath(name string) string {
 
 type Game interface {
 	Quit()
-	Render() error
-	Update() error
-	Running() bool
-	HandleEvents() error
-	Destroy()
 	GetMachine() *state.Machine
 	GetSize() (int32, int32)
-	GetScrollSpeed() float64
-	DecreasePlayerLives()
-	GetPlayerLives() int
-	IncreaseLevel() error
-	LevelComplete() bool
+	ToggleFullscreen() error
 }
 
 var game Game
 
 func SetGame(g Game) {
 	game = g
-}
-
-func Render() error {
-	return game.Render()
-}
-
-func Update() error {
-	return game.Update()
-}
-
-func Running() bool {
-	return game.Running()
-}
-
-func HandleEvents() error {
-	return game.HandleEvents()
-}
-
-func Destroy() {
-	game.Destroy()
 }
 
 func Quit() {
@@ -72,22 +56,6 @@ func GetSize() (int32, int32) {
 	return game.GetSize()
 }
 
-func GetScrollSpeed() float64 {
-	return game.GetScrollSpeed()
-}
-
-func DecreasePlayerLives() {
-	game.DecreasePlayerLives()
-}
-
-func GetPlayerLives() int {
-	return game.GetPlayerLives()
-}
-
-func IncreaseLevel() error {
-	return game.IncreaseLevel()
-}
-
-func LevelComplete() bool {
-	return game.LevelComplete()
+func ToggleFullscreen() error {
+	return game.ToggleFullscreen()
 }

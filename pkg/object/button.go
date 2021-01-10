@@ -23,7 +23,6 @@ type button struct {
 type Callback func() error
 
 func NewButton(st Properties) GameObject {
-	st.IgnoreCam = true
 	return &button{shooterObject: newShooterObj(st), cID: st.Callback}
 }
 
@@ -46,19 +45,19 @@ func (b *button) Update() error {
 	}
 
 	pos := input.GetMousePosition()
-	if math.Inside(b.pos, pos, math.Add(b.pos, b.size)) {
+	if math.InsideRect(b.model.Collider.Add(b.pos.IntVector()), pos) {
 		pressed := input.GetMousePressed(input.LEFT)
 		if pressed {
 			b.wasPressed = true
-			b.frame = CLICKED
+			b.model.ChangeSprites(CLICKED)
 			b.released = false
 		} else {
-			b.frame = HOVER
+			b.model.ChangeSprites(HOVER)
 			b.released = true
 		}
 	} else {
 		b.wasPressed = false
-		b.frame = OUT
+		b.model.ChangeSprites(OUT)
 	}
 
 	return nil

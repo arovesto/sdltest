@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="120" height="34" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="18">
- <properties>
-  <property name="background" value="background.png"/>
-  <property name="evil-tank" value="evil-tank.png"/>
-  <property name="tank" value="tank.png"/>
- </properties>
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="120" height="34" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="36">
  <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" spacing="1" tilecount="336" columns="24">
   <image source="tileset.png" width="791" height="461"/>
  </tileset>
@@ -14,8 +9,7 @@
  <objectgroup id="5" name="background" visible="0">
   <object id="12" name="Background" type="background" x="0" y="0" width="1920" height="1088">
    <properties>
-    <property name="frames" type="int" value="1"/>
-    <property name="texture" value="background"/>
+    <property name="model" value="background"/>
    </properties>
   </object>
  </objectgroup>
@@ -24,30 +18,31 @@
    <property name="collision" type="bool" value="true"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eJzt29sNgjAYhuGiUyhruYBxAnUYZxAH8HCnDuBhCQ/XDmAJkjQEAkWav9b3Sb4YG/Rv8t2gKUohZK+IhBwAAAAAMtLb8V6D9KU2iK8MLYLfQ7//gV4BAAAAAAAAwF876Q3Aqavg7FnJucqytXw9UXaBbL8uO6DfDP3WW0RZJK9t+xn6rUe/7bjud62zMbJ1OM9Xvt1fdSXt96RzNnJxN85bkv26lPcbR1m36Sv9hiPt96ZzN/KouHYU8PNvT8HZVb9pc+b7pLDWJGXn7opno8d6D5MA+l0q+/8HViI7bW6g7M7Kmok/3zHV3c4D6Hevc7DMscP5b3UpzKI=
+   eJzt2lEOwUAUheEpq1CrxGKsATvwhh1YhmcL0MmQNDI67tDcO9P/S06EVGfSIzRynUPN7g2pOQAAAAB0+Nvx2ReZa20QP2kFQXnodxroFQAAAAAAAADsOmpvAKO6Kq69jsxVxl5DPs1+94prTwX9pm2bEM1jc99Dv2n0m6eUfq2RzC9Yu78awlxGUEq/UvQb0G/dJNfhNtou0vz3s/8Nfs9L/7l/bCPHDiU2d9efjZbMYVrPTnhtfA6fqzFh4fKvx/J5jlX3GdtU8J/KqctZmMsf138AO621nA==
   </data>
  </layer>
  <layer id="4" name="foreground" width="120" height="34">
   <data encoding="base64" compression="zlib">
-   eJztxzENADAMA7BgGIzBKH9Qg5BvUiX7cwIAAAAAAAAAAAAAAAAAf5xydrvl7DblACQPdAoA/Q==
+   eJztzjENACAMAMFiARnIQAP+teCAbg1N7rbfPgIAAAAAAAAAAAAAAAAAasyk6W0lTW/70WdUngD86wIidwFS
   </data>
  </layer>
  <objectgroup id="2" name="objects">
   <properties>
    <property name="collision" type="bool" value="true"/>
   </properties>
-  <object id="7" name="Player" type="player" x="696.97" y="928.788" width="128" height="64">
+  <object id="7" name="Player" type="player" x="683.637" y="935.455" width="128" height="64">
    <properties>
-    <property name="frames" type="int" value="4"/>
-    <property name="texture" value="tank"/>
-    <property name="xMaxSpeed" type="int" value="7"/>
+    <property name="model" value="tank"/>
    </properties>
   </object>
-  <object id="15" name="Enemy1" type="enemy" x="787.03" y="156.818" width="128" height="64">
+  <object id="15" name="Enemy1" type="enemy" x="731.633" y="104.212" width="128" height="64">
    <properties>
-    <property name="frames" type="int" value="4"/>
-    <property name="texture" value="evil-tank"/>
-    <property name="xMaxSpeed" type="int" value="7"/>
+    <property name="model" value="evil_tank"/>
+   </properties>
+  </object>
+  <object id="18" name="Enemy2" type="enemy" x="2425.09" y="935.636" width="128" height="64">
+   <properties>
+    <property name="model" value="evil_tank"/>
    </properties>
   </object>
  </objectgroup>

@@ -1,0 +1,145 @@
+menu:
+  models:
+    play_button:
+      parts:
+        - frames: 3
+      collider:
+        w: 512
+        h: 256
+      texture_path: "assets/play.png"
+      ignore_cam: true
+    exit_button:
+      parts:
+        - frames: 3
+      collider:
+        w: 512
+        h: 256
+      texture_path: "assets/exit.png"
+      ignore_cam: true
+  objects:
+    - type: button
+      x: 100
+      y: 200
+      model: "play_button"
+      callback: 0
+    - type: button
+      x: 1300
+      y: 200
+      model: "exit_button"
+      callback: 1
+pause:
+  models:
+    resume:
+      parts:
+        - frames: 3
+      collider:
+        w: 256
+        h: 128
+      texture_path: "assets/resume.png"
+      ignore_cam: true
+    menu:
+      parts:
+        - frames: 3
+      collider:
+        w: 256
+        h: 128
+      texture_path: "assets/menu.png"
+      ignore_cam: true
+    button_left:
+      parts:
+        - frames: 3
+      collider:
+        w: 64
+        h: 64
+      texture_path: "assets/button-left.png"
+      ignore_cam: true
+    button_right:
+      parts:
+        - frames: 3
+      collider:
+        w: 64
+        h: 64
+      texture_path: "assets/button-left.png"
+      ignore_cam: true
+      render_flip: 1
+    text:
+      collider:
+        x: 880
+        y: 500
+        w: 200
+        h: 100
+  objects:
+    - type: button
+      x: 600
+      y: 300
+      model: "resume"
+      callback: 0
+    - type: button
+      x: 1100
+      y: 300
+      model: "menu"
+      callback: 1
+    - type: button
+      x: 700
+      y: 500
+      model: "button_left"
+      callback: 2
+    - type: button
+      x: 1180
+      y: 500
+      model: "button_right"
+      callback: 3
+    - type: text
+      x: 900
+      y: 500
+      model: "text"
+      callback: 0
+game_over:
+  models:
+    again:
+      parts:
+        - frames: 3
+      collider:
+        w: 512
+        h: 256
+      texture_path: "assets/again.png"
+      ignore_cam: true
+    menu:
+      parts:
+        - frames: 3
+          on_texture:
+            w: 256
+            h: 128
+      collider:
+        w: 512
+        h: 256
+      texture_path: "assets/menu.png"
+      ignore_cam: true
+    game_over:
+      parts:
+        - frames: 2
+      collider:
+        w: 1024
+        h: 512
+      texture_path: "assets/game-over.png"
+      ignore_cam: true
+  objects:
+    - type: button
+      x: 400
+      y: 600
+      model: "again"
+      callback: 0
+    - type: button
+      x: 1000
+      y: 600
+      model: "menu"
+      callback: 1
+    - type: animation
+      x: 450
+      y: 50
+      model: "game_over"
+      animspeed: 500
+
+
+
+

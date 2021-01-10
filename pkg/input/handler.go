@@ -17,7 +17,7 @@ const (
 
 type Handler struct {
 	mousePressed  [3]bool
-	mousePos      math.Vector2D
+	mousePos      math.IntVector
 	keyboardState []uint8
 }
 
@@ -41,8 +41,8 @@ func Update() error {
 				h.mousePressed[RIGHT] = event.Type == sdl.MOUSEBUTTONDOWN
 			}
 		case *sdl.MouseMotionEvent:
-			h.mousePos.X = float64(event.X)
-			h.mousePos.Y = float64(event.Y)
+			h.mousePos.X = event.X
+			h.mousePos.Y = event.Y
 		}
 	}
 }
@@ -51,12 +51,12 @@ func GetMousePressed(id int) bool {
 	return h.mousePressed[id]
 }
 
-func GetMousePosition() math.Vector2D {
+func GetMousePosition() math.IntVector {
 	return h.mousePos
 }
 
-func GetMousePositionInCamera() math.Vector2D {
-	return math.Sub(h.mousePos, camera.GetCamPos())
+func GetMousePositionInCamera() math.IntVector {
+	return h.mousePos.Sub(camera.Camera.Pos.IntVector())
 }
 
 func IsKeyDown(scancode sdl.Scancode) bool {

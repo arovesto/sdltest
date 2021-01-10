@@ -9,7 +9,6 @@ type State interface {
 	OnSwitch() error
 	OnContinue() error
 	OnExit() error
-	GetID() ID
 }
 
 var (

@@ -1,7 +1,8 @@
 package object
 
 import (
-	"github.com/veandco/go-sdl2/sdl"
+	"github.com/arovesto/sdl/pkg/camera"
+	"github.com/arovesto/sdl/pkg/math"
 )
 
 type enemy struct {
@@ -10,39 +11,31 @@ type enemy struct {
 
 func NewEnemy(st Properties) GameObject {
 	obj := newShooterObj(st)
-	//obj.vel = math.NewVec(2, 0)
 	return &enemy{shooterObject: obj}
 }
 
-func (e *enemy) Update() error {
-	now := sdl.GetTicks()
-	if now-e.spriteChanged > animationTime {
-		e.spriteChanged = now
-		e.frame += 1
-		if e.frame >= e.frames {
-			e.frame = 0
-		}
-	}
-	//if e.pos.X < 500 || e.pos.X > 2000 {
-	//	e.vel.X *= -1
-	//	if e.vel.X > 0 {
-	//		e.flip = sdl.FLIP_NONE
-	//	} else {
-	//		e.flip = sdl.FLIP_HORIZONTAL
-	//	}
-	//}
-	return e.shooterObject.Update()
-}
-
 func (e *enemy) GetType() Type {
-	return Enemy
+	return EnemyType
 }
 
-func (e *enemy) Collide(o GameObject) {
-	// TODO store this metadata in texture manager
-	//e.id = "largeexplosion"
-	//e.size = math.NewVec(128, 128)
-	//e.frame = 0
-	//e.frames = 9
-	e.shooterObject.Collide(o)
+func (e *enemy) Update() error {
+	dist := math.AbsF(MainPlayer.pos.X - e.pos.X)
+	var w float64
+	switch {
+	case dist <= 1000:
+		w = 0.2
+		e.model.Alpha = 255
+	case dist <= 2000:
+		w = 0.1
+		e.model.Alpha = 100
+	default:
+		w = 0
+		e.model.Alpha = 0
+	}
+	if w != 0 {
+		camera.Camera.Targets[e.id] = camera.Target{Pos: e.pos, Weight: w}
+	} else {
+		delete(camera.Camera.Targets, e.id)
+	}
+	return e.shooterObject.Update()
 }

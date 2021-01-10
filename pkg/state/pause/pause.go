@@ -44,7 +44,8 @@ var textCallbacks = []object.TextCallback{
 type pause struct {
 	objects []object.GameObject
 
-	canPause uint32
+	canPause      uint32
+	canFullScreen uint32
 }
 
 func init() {
@@ -52,13 +53,23 @@ func init() {
 }
 
 func (p *pause) Update() (err error) {
-
-	if input.IsKeyDown(sdl.SCANCODE_ESCAPE) && p.canPause == 10 {
+	if input.IsKeyDown(sdl.SCANCODE_ESCAPE) && p.canPause >= 20 {
+		p.canPause = 0
 		if err = global.GetMachine().PopState(); err != nil {
 			return
 		}
 	}
-	if p.canPause < 10 {
+	if input.IsKeyDown(sdl.SCANCODE_F11) && p.canFullScreen >= 20 {
+		p.canFullScreen = 0
+		if err = global.ToggleFullscreen(); err != nil {
+			return err
+		}
+	}
+	if p.canFullScreen < 20 {
+		p.canFullScreen++
+	}
+
+	if p.canPause < 20 {
 		p.canPause++
 	}
 
@@ -80,7 +91,7 @@ func (p *pause) Render() (err error) {
 }
 
 func (p *pause) OnEnter() (err error) {
-	p.objects, err = parser.Parse(global.AssetsPath, stateID)
+	p.objects, err = parser.Parse(global.MenusPath, "pause")
 	if err != nil {
 		return
 	}
