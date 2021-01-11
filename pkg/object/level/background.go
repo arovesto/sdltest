@@ -1,12 +1,13 @@
-package object
+package level
 
 import (
 	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/math"
+	"github.com/arovesto/sdl/pkg/object"
 )
 
 const (
-	backgroundSpeed = 5
+	backgroundSpeed = 11
 )
 
 type background struct {
@@ -15,11 +16,16 @@ type background struct {
 	scrollLine int32
 
 	prevCamPos int32
+	speed      int32
 }
 
-func NewBackground(st Properties) GameObject {
+func NewBackground(st object.Properties) object.GameObject {
+	if st.AnimSpeed == 0 {
+		st.AnimSpeed = backgroundSpeed
+	}
 	res := &background{
 		shooterObject: newShooterObj(st),
+		speed:         int32(st.AnimSpeed),
 	}
 	res.init()
 	return res
@@ -40,8 +46,11 @@ func (b *background) init() {
 
 func (b *background) Update() error {
 	pos, _, width, height := camera.Camera.GetRect().Values()
-	b.scrollLine -= (pos - b.prevCamPos) / backgroundSpeed
-	b.prevCamPos = pos
+	if math.Abs(pos-b.prevCamPos) >= b.speed {
+		b.scrollLine -= (pos - b.prevCamPos) / b.speed
+		b.prevCamPos = pos
+	}
+
 	if b.scrollLine > width {
 		b.scrollLine -= width
 	}

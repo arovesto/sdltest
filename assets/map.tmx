@@ -12,6 +12,18 @@
     <property name="model" value="background"/>
    </properties>
   </object>
+  <object id="12" name="Hills" type="background" x="0" y="0" width="1920" height="1088">
+   <properties>
+    <property name="model" value="hills"/>
+    <property name="animSpeed" value="8"/>
+   </properties>
+  </object>
+  <object id="12" name="Hill" type="background" x="0" y="0" width="1920" height="1088">
+   <properties>
+    <property name="model" value="hill"/>
+    <property name="animSpeed" value="6"/>
+   </properties>
+  </object>
  </objectgroup>
  <layer id="1" name="background" width="120" height="34">
   <properties>

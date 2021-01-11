@@ -3,12 +3,13 @@ package menu
 import (
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/object"
+	menu2 "github.com/arovesto/sdl/pkg/object/menu"
 	"github.com/arovesto/sdl/pkg/parser"
 	"github.com/arovesto/sdl/pkg/sound"
 	"github.com/arovesto/sdl/pkg/state"
 )
 
-var callbacks = []object.Callback{
+var callbacks = []menu2.Callback{
 	func() error {
 		return global.GetMachine().ChangeState(state.Play)
 	},
@@ -58,7 +59,7 @@ func (m *menu) OnEnter() (err error) {
 		return
 	}
 
-	object.SetCallbacks(m.objects, callbacks, nil)
+	menu2.SetCallbacks(m.objects, callbacks, nil)
 	return sound.PlayMusic("heroes", -1)
 }
 

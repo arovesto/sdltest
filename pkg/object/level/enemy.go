@@ -1,20 +1,21 @@
-package object
+package level
 
 import (
 	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/math"
+	"github.com/arovesto/sdl/pkg/object"
 )
 
 type enemy struct {
 	shooterObject
 }
 
-func NewEnemy(st Properties) GameObject {
+func NewEnemy(st object.Properties) object.GameObject {
 	obj := newShooterObj(st)
 	return &enemy{shooterObject: obj}
 }
 
-func (e *enemy) GetType() Type {
+func (e *enemy) GetType() object.Type {
 	return EnemyType
 }
 

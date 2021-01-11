@@ -3,6 +3,8 @@ package pause
 import (
 	"fmt"
 
+	"github.com/arovesto/sdl/pkg/object/menu"
+
 	"github.com/veandco/go-sdl2/sdl"
 
 	"github.com/arovesto/sdl/pkg/game/global"
@@ -18,7 +20,7 @@ const (
 	stateID = 2
 )
 
-var callbacks = []object.Callback{
+var callbacks = []menu.Callback{
 	func() error {
 		return global.GetMachine().PopState()
 	},
@@ -35,7 +37,7 @@ var callbacks = []object.Callback{
 	},
 }
 
-var textCallbacks = []object.TextCallback{
+var textCallbacks = []menu.TextCallback{
 	func() (string, error) {
 		return fmt.Sprintf("sound %.2f%%", float64(sound.GetVolume())/float64(mix.MAX_VOLUME)), nil
 	},
@@ -44,8 +46,7 @@ var textCallbacks = []object.TextCallback{
 type pause struct {
 	objects []object.GameObject
 
-	canPause      uint32
-	canFullScreen uint32
+	canPause uint32
 }
 
 func init() {
@@ -58,15 +59,6 @@ func (p *pause) Update() (err error) {
 		if err = global.GetMachine().PopState(); err != nil {
 			return
 		}
-	}
-	if input.IsKeyDown(sdl.SCANCODE_F11) && p.canFullScreen >= 20 {
-		p.canFullScreen = 0
-		if err = global.ToggleFullscreen(); err != nil {
-			return err
-		}
-	}
-	if p.canFullScreen < 20 {
-		p.canFullScreen++
 	}
 
 	if p.canPause < 20 {
@@ -96,7 +88,7 @@ func (p *pause) OnEnter() (err error) {
 		return
 	}
 
-	object.SetCallbacks(p.objects, callbacks, textCallbacks)
+	menu.SetCallbacks(p.objects, callbacks, textCallbacks)
 
 	return nil
 }

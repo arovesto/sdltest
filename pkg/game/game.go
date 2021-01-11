@@ -30,6 +30,8 @@ type Game struct {
 	fullscreen bool
 	w          int32
 	h          int32
+
+	canFullScreen int32
 }
 
 type Opts struct {
@@ -67,6 +69,8 @@ func InitGame(opts Opts) (*Game, error) {
 
 	global.Renderer = renderer
 
+	sdl.SetHint(sdl.HINT_RENDER_SCALE_QUALITY, "2")
+
 	if err = sound.Load("assets/heroes.flac", sound.MUSIC, "heroes"); err != nil {
 		return nil, err
 	}
@@ -74,16 +78,12 @@ func InitGame(opts Opts) (*Game, error) {
 		return nil, err
 	}
 
-	machine := state.NewMachine()
-	if err := machine.PushState(state.Menu); err != nil {
-		return nil, err
-	}
 	w, h := window.GetSize()
-
+	machine := state.NewMachine()
 	g := &Game{renderer: renderer, window: window, running: true, states: machine, fullscreen: opts.Fullscreen, w: w, h: h}
 	global.SetGame(g)
 
-	return g, nil
+	return g, machine.PushState(state.Menu)
 }
 
 func (g *Game) Render() (err error) {
@@ -100,6 +100,16 @@ func (g *Game) Render() (err error) {
 }
 
 func (g *Game) Update() (err error) {
+	// TODO create some kind of storage for such events and run them all here
+	if input.IsKeyDown(sdl.SCANCODE_F11) && g.canFullScreen >= 20 {
+		g.canFullScreen = 0
+		if err = g.ToggleFullscreen(); err != nil {
+			return err
+		}
+	}
+	if g.canFullScreen < 20 {
+		g.canFullScreen++
+	}
 	return g.states.Update()
 }
 

@@ -1,6 +1,7 @@
 package math
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -57,6 +58,10 @@ func (v Vector2D) DivComponents(other Vector2D) Vector2D {
 	return Vector2D{X: v.X / other.X, Y: v.Y / other.Y}
 }
 
+func (v Vector2D) String() string {
+	return fmt.Sprintf("(%.2f, %.2f)", v.X, v.Y)
+}
+
 func Near(a, b, distance Vector2D) bool {
 	return AbsF(a.X-b.X) <= distance.X && AbsF(a.Y-b.Y) <= distance.Y
 }
@@ -103,6 +108,14 @@ type IntVector struct {
 	Y int32 `yaml:"y"`
 }
 
+func (v IntVector) Mul(axis IntVector) IntVector {
+	return IntVector{X: v.X * axis.X, Y: v.Y * axis.Y}
+}
+
+func (v IntVector) Div(axis IntVector) IntVector {
+	return IntVector{X: v.X / axis.X, Y: v.Y / axis.Y}
+}
+
 func (v IntVector) Add(other IntVector) IntVector {
 	return IntVector{X: v.X + other.X, Y: v.Y + other.Y}
 }
@@ -130,6 +143,14 @@ type Rect struct {
 	H int32 `yaml:"h"`
 }
 
+func (r Rect) Mul(axis IntVector) Rect {
+	return Rect{X: r.X * axis.X, Y: r.Y * axis.Y, W: r.W * axis.X, H: r.H * axis.Y}
+}
+
+func (r Rect) Div(axis IntVector) Rect {
+	return Rect{X: r.X / axis.X, Y: r.Y / axis.Y, W: r.W / axis.X, H: r.H / axis.Y}
+}
+
 func (r Rect) GetPos() IntVector {
 	return IntVector{X: r.X, Y: r.Y}
 }
@@ -152,4 +173,16 @@ func (r Rect) Add(v IntVector) Rect {
 
 func (r Rect) Empty() bool {
 	return r.X == 0 && r.Y == 0 && r.W == 0 && r.H == 0
+}
+
+type AngleDeg float64 // clockwise from X axis
+
+type AngleRad float64 // clockwise from X axis
+
+func (a AngleRad) Deg() AngleDeg {
+	return AngleDeg(180 * a / math.Pi)
+}
+
+func AngleOn(from, to Vector2D) AngleDeg {
+	return AngleRad(math.Atan((to.Y - from.Y) / math.Abs(to.X-from.X))).Deg()
 }

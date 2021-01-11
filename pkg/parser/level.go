@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/arovesto/sdl/pkg/object/factory"
+
 	"github.com/arovesto/sdl/pkg/model"
 	"gopkg.in/yaml.v2"
 
@@ -122,7 +124,7 @@ func ParseLevel(levelFile, modelsFile string) (*level.Level, error) {
 						state.AnimSpeed = uint32(mustInt(p.Value))
 					}
 				}
-				if obj, err := object.Create(o.Type, state); err == nil {
+				if obj, err := factory.Create(o.Type, state); err == nil {
 					objects = append(objects, obj)
 					if c {
 						collisionObjects = append(collisionObjects, obj)

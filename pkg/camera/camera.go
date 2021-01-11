@@ -33,6 +33,11 @@ func (c *camera) GetRect() math.Rect {
 	return math.Rect{X: int32(c.Pos.X), Y: int32(c.Pos.Y), W: w, H: h}
 }
 
+func (c *camera) Reset() {
+	c.Targets = map[global.ID]Target{}
+	c.Pos = math.ZeroVec()
+}
+
 func (c *camera) Update() {
 	var target math.Vector2D
 	var haveTarget bool

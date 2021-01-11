@@ -21,7 +21,7 @@ type Model struct {
 	// relative to position collision rectangle. Should be used on collisions with terrain
 	Collider math.Rect `yaml:"collider"`
 	// FIXME (not working) model rotation angle, around the center of Collider (collision is not affected by this)
-	Angle float64 `yaml:"angle"`
+	Angle math.AngleDeg `yaml:"angle"`
 	// model brightness setting
 	Alpha uint8 `yaml:"alpha"`
 	// should we ignore camera completely
@@ -30,6 +30,8 @@ type Model struct {
 	Path string `yaml:"texture_path"`
 	// flip value, 0 = none; 1 = horizontal; 2 = vertical; 3 = both
 	Flip sdl.RendererFlip `yaml:"render_flip"`
+	// window size this model was created for
+	BaseSize math.IntVector `yaml:"base_size"`
 
 	t *sdl.Texture
 }
@@ -53,6 +55,10 @@ func (m Model) GetCopy() Model {
 	}
 
 	return n
+}
+
+func (m *Model) Center() math.IntVector {
+	return m.Collider.GetPos().Add(m.Collider.GetSize()).Div(math.NewIntVector(2, 2))
 }
 
 // if to < 0 || to >= frames - go to next sprite
@@ -109,10 +115,14 @@ type Part struct {
 	OnModel math.Rect `yaml:"on_model"`
 	// Rectangle used on texture place
 	OnTexture math.Rect `yaml:"on_texture"`
-	// point to rotate this part
+	// point to rotate this part around
 	Pivot math.IntVector `yaml:"pivot"`
 	// current rotation of this part
-	Angle float64 `yaml:"angle"`
+	Angle math.AngleDeg `yaml:"angle"`
+	// maximum allowed angle
+	MaxAngle math.AngleDeg `yaml:"max_angle"`
+	// minimum allowed angle
+	MinAngle math.AngleDeg `yaml:"min_angle"`
 	// lightning of texture
 	Alpha uint8 `yaml:"alpha"`
 	// amount of frames in part's texture
@@ -130,10 +140,35 @@ func (p Part) draw(m *Model, where math.IntVector) error {
 		return err
 	}
 	// TODO not precise, need better method of combining rotations
-	// TODO add flip heredddda
+	// TODO add flip here
 	p.OnTexture.X += p.OnTexture.W * p.Frame
-	if err = global.Renderer.CopyEx(m.t, math.SDLRect(p.OnTexture), math.SDLRect(p.OnModel.Add(where)), p.Angle+m.Angle, math.SDLPoint(p.Pivot.Add(where)), m.Flip); err != nil {
+	if m.Flip&sdl.FLIP_HORIZONTAL != 0 {
+		cX := m.Center().X
+		p.OnModel.X = cX - (p.OnModel.X - cX) - p.OnModel.W
+		p.Pivot.X = p.OnModel.W - p.Pivot.X
+		tmp := p.MaxAngle
+		p.MaxAngle = -p.MinAngle
+		p.MinAngle = -tmp
+		p.Angle = -p.Angle
+	}
+	if p.Angle > p.MaxAngle && p.MaxAngle-p.MinAngle != 0 {
+		p.Angle = p.MaxAngle
+	}
+	if p.Angle < p.MinAngle && p.MaxAngle-p.MinAngle != 0 {
+		p.Angle = p.MinAngle
+	}
+
+	if err = global.Renderer.CopyEx(m.t, math.SDLRect(p.OnTexture), math.SDLRect(p.OnModel.Add(where)), float64(p.Angle+m.Angle), math.SDLPoint(p.Pivot), m.Flip); err != nil {
 		return err
 	}
 	return m.t.SetAlphaMod(mod)
+}
+
+func (p Part) GetPivotPoint(where math.IntVector, m *Model) math.IntVector {
+	if m.Flip&sdl.FLIP_HORIZONTAL != 0 {
+		cX := m.Center().X
+		p.OnModel.X = cX - (p.OnModel.X - cX) - p.OnModel.W
+		p.Pivot.X = p.OnModel.W - p.Pivot.X
+	}
+	return p.OnModel.GetPos().Add(where).Add(p.Pivot)
 }

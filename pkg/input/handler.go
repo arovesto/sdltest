@@ -56,7 +56,7 @@ func GetMousePosition() math.IntVector {
 }
 
 func GetMousePositionInCamera() math.IntVector {
-	return h.mousePos.Sub(camera.Camera.Pos.IntVector())
+	return h.mousePos.Add(camera.Camera.Pos.IntVector())
 }
 
 func IsKeyDown(scancode sdl.Scancode) bool {

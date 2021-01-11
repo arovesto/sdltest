@@ -7,8 +7,41 @@ background:
     h: 1088
   texture_path: "assets/background.png"
   ignore_cam: true
+hills:
+  parts:
+    - frames: 1
+    - frames: 1
+  collider:
+    w: 2048
+    h: 1024
+  texture_path: "assets/hills.png"
+  ignore_cam: true
+hill:
+  parts:
+    - frames: 1
+    - frames: 1
+  collider:
+    w: 2048
+    h: 1024
+  texture_path: "assets/hill.png"
+  ignore_cam: true
 tank:
   parts:
+    - frames: 1
+      on_texture:
+        y: 72
+        w: 64
+        h: 12
+      on_model:
+        x: 84
+        y: 12
+        w: 64
+        h: 12
+      pivot:
+        x: 4
+        y: 4
+      max_angle: 10
+      min_angle: -30
     - frames: 3
       on_texture:
         y: 8
@@ -18,6 +51,9 @@ tank:
         y: 8
         w: 128
         h: 56
+      pivot:
+        x: 64
+        y: 34
   texture_path: "assets/tank.png"
   collider:
     y: 8

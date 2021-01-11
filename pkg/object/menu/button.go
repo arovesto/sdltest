@@ -1,9 +1,10 @@
-package object
+package menu
 
 import (
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/input"
 	"github.com/arovesto/sdl/pkg/math"
+	"github.com/arovesto/sdl/pkg/object"
 )
 
 const (
@@ -13,28 +14,15 @@ const (
 )
 
 type button struct {
-	shooterObject
+	menuObject
 	c          Callback
 	released   bool
 	wasPressed bool
 	cID        global.ID
 }
 
-type Callback func() error
-
-func NewButton(st Properties) GameObject {
-	return &button{shooterObject: newShooterObj(st), cID: st.Callback}
-}
-
-func SetCallbacks(obj []GameObject, clb []Callback, tlb []TextCallback) {
-	for _, o := range obj {
-		if btn, ok := o.(*button); ok {
-			btn.c = clb[btn.cID]
-		}
-		if txt, ok := o.(*text); ok {
-			txt.c = tlb[txt.cID]
-		}
-	}
+func NewButton(st object.Properties) object.GameObject {
+	return &button{menuObject: newMenuObject(st), cID: st.Callback}
 }
 
 func (b *button) Update() error {
@@ -45,7 +33,7 @@ func (b *button) Update() error {
 	}
 
 	pos := input.GetMousePosition()
-	if math.InsideRect(b.model.Collider.Add(b.pos.IntVector()), pos) {
+	if math.InsideRect(b.model.Collider.Add(b.GetPosition().IntVector()), pos) {
 		pressed := input.GetMousePressed(input.LEFT)
 		if pressed {
 			b.wasPressed = true
@@ -60,5 +48,5 @@ func (b *button) Update() error {
 		b.model.ChangeSprites(OUT)
 	}
 
-	return nil
+	return b.menuObject.Update()
 }

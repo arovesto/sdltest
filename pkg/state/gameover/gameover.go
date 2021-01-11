@@ -4,11 +4,12 @@ import (
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/input"
 	"github.com/arovesto/sdl/pkg/object"
+	"github.com/arovesto/sdl/pkg/object/menu"
 	"github.com/arovesto/sdl/pkg/parser"
 	"github.com/arovesto/sdl/pkg/state"
 )
 
-var callbacks = []object.Callback{
+var callbacks = []menu.Callback{
 	func() error {
 		return global.GetMachine().ChangeState(state.Play)
 	},
@@ -49,7 +50,7 @@ func (g *gameover) OnEnter() (err error) {
 		return
 	}
 
-	object.SetCallbacks(g.objects, callbacks, nil)
+	menu.SetCallbacks(g.objects, callbacks, nil)
 
 	return nil
 }

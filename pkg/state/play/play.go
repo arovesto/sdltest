@@ -39,7 +39,7 @@ func (p *play) Render() (err error) {
 }
 
 func (p *play) OnEnter() (err error) {
-	camera.Camera.Targets = map[global.ID]camera.Target{}
+	camera.Camera.Reset()
 	p.level, err = parser.ParseLevel(global.MapPath, global.ModelsPath)
 	return
 }

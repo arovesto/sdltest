@@ -27,6 +27,13 @@ func AbsF(a float64) float64 {
 	return a
 }
 
+func AbsAngle(a AngleDeg) AngleDeg {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
 func Sign(a int32) int32 {
 	if a > 0 {
 		return 1
@@ -65,4 +72,14 @@ func SDLRect(r Rect) *sdl.Rect {
 
 func SDLPoint(v IntVector) *sdl.Point {
 	return &sdl.Point{X: v.X, Y: v.Y}
+}
+
+func ClampAngle(a, max AngleDeg) AngleDeg {
+	if a > max {
+		return max
+	}
+	if a < -max {
+		return -max
+	}
+	return a
 }

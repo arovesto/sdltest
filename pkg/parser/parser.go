@@ -4,6 +4,8 @@ import (
 	"errors"
 	"io/ioutil"
 
+	"github.com/arovesto/sdl/pkg/object/factory"
+
 	"github.com/arovesto/sdl/pkg/model"
 
 	"github.com/arovesto/sdl/pkg/game/global"
@@ -20,8 +22,8 @@ type State struct {
 
 type Object struct {
 	Type      string    `yaml:"type"`
-	X         int       `yaml:"x"`
-	Y         int       `yaml:"y"`
+	X         float64   `yaml:"x"`
+	Y         float64   `yaml:"y"`
 	Model     string    `yaml:"model"`
 	Callback  global.ID `yaml:"callback"`
 	AnimSpeed int       `yaml:"animspeed"`
@@ -41,8 +43,8 @@ func Parse(file, state string) (res []object.GameObject, err error) {
 	if st, ok := s[state]; ok {
 		for _, o := range st.Objects {
 			var obj object.GameObject
-			obj, err = object.Create(o.Type, object.Properties{
-				Pos:       math.NewVec(float64(o.X), float64(o.Y)),
+			obj, err = factory.Create(o.Type, object.Properties{
+				Pos:       math.NewVec(o.X/100, o.Y/100),
 				Model:     st.Models[o.Model].GetCopy(),
 				AnimSpeed: uint32(o.AnimSpeed),
 				Callback:  o.Callback,

@@ -7,7 +7,9 @@ menu:
         w: 512
         h: 256
       texture_path: "assets/play.png"
-      ignore_cam: true
+      base_size:
+        x: 1920
+        y: 1080
     exit_button:
       parts:
         - frames: 3
@@ -15,16 +17,18 @@ menu:
         w: 512
         h: 256
       texture_path: "assets/exit.png"
-      ignore_cam: true
+      base_size:
+        x: 1920
+        y: 1080
   objects:
     - type: button
-      x: 100
-      y: 200
+      x: 5
+      y: 20
       model: "play_button"
       callback: 0
     - type: button
-      x: 1300
-      y: 200
+      x: 65
+      y: 20
       model: "exit_button"
       callback: 1
 pause:
@@ -36,7 +40,9 @@ pause:
         w: 256
         h: 128
       texture_path: "assets/resume.png"
-      ignore_cam: true
+      base_size:
+        x: 1920
+        y: 1080
     menu:
       parts:
         - frames: 3
@@ -44,7 +50,9 @@ pause:
         w: 256
         h: 128
       texture_path: "assets/menu.png"
-      ignore_cam: true
+      base_size:
+        x: 1920
+        y: 1080
     button_left:
       parts:
         - frames: 3
@@ -52,7 +60,9 @@ pause:
         w: 64
         h: 64
       texture_path: "assets/button-left.png"
-      ignore_cam: true
+      base_size:
+        x: 1920
+        y: 1080
     button_right:
       parts:
         - frames: 3
@@ -60,38 +70,38 @@ pause:
         w: 64
         h: 64
       texture_path: "assets/button-left.png"
-      ignore_cam: true
+      base_size:
+        x: 1920
+        y: 1080
       render_flip: 1
     text:
       collider:
-        x: 880
-        y: 500
         w: 200
         h: 100
   objects:
     - type: button
-      x: 600
-      y: 300
+      x: 30
+      y: 30
       model: "resume"
       callback: 0
     - type: button
-      x: 1100
-      y: 300
+      x: 60
+      y: 30
       model: "menu"
       callback: 1
     - type: button
-      x: 700
-      y: 500
+      x: 35
+      y: 50
       model: "button_left"
       callback: 2
     - type: button
-      x: 1180
-      y: 500
+      x: 65
+      y: 50
       model: "button_right"
       callback: 3
     - type: text
-      x: 900
-      y: 500
+      x: 47
+      y: 50
       model: "text"
       callback: 0
 game_over:
@@ -103,7 +113,9 @@ game_over:
         w: 512
         h: 256
       texture_path: "assets/again.png"
-      ignore_cam: true
+      base_size:
+        x: 1920
+        y: 1080
     menu:
       parts:
         - frames: 3
@@ -114,7 +126,9 @@ game_over:
         w: 512
         h: 256
       texture_path: "assets/menu.png"
-      ignore_cam: true
+      base_size:
+        x: 1920
+        y: 1080
     game_over:
       parts:
         - frames: 2
@@ -122,21 +136,23 @@ game_over:
         w: 1024
         h: 512
       texture_path: "assets/game-over.png"
-      ignore_cam: true
+      base_size:
+        x: 1920
+        y: 1080
   objects:
     - type: button
-      x: 400
-      y: 600
+      x: 20
+      y: 60
       model: "again"
       callback: 0
     - type: button
-      x: 1000
-      y: 600
+      x: 50
+      y: 60
       model: "menu"
       callback: 1
     - type: animation
-      x: 450
-      y: 50
+      x: 22
+      y: 5
       model: "game_over"
       animspeed: 500
 

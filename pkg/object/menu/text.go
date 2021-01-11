@@ -1,14 +1,15 @@
-package object
+package menu
 
 import (
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/math"
+	"github.com/arovesto/sdl/pkg/object"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
 
 type text struct {
-	shooterObject
+	menuObject
 	c   TextCallback
 	cID global.ID
 	txt string
@@ -16,17 +17,18 @@ type text struct {
 	font *ttf.Font
 }
 
-type TextCallback func() (string, error)
-
-func NewText(st Properties) GameObject {
+func NewText(st object.Properties) object.GameObject {
 	// TODO switch to render text based on picture, then remove this shit and use proper model
 	f, _ := ttf.OpenFont("assets/minecraft.ttf", 30)
-	return &text{shooterObject: newShooterObj(st), cID: st.Callback, font: f}
+	return &text{menuObject: newMenuObject(st), cID: st.Callback, font: f}
 }
 
 func (t *text) Update() (err error) {
 	t.txt, err = t.c()
-	return
+	if err != nil {
+		return err
+	}
+	return t.menuObject.Update()
 }
 
 func (t *text) Draw() error {
@@ -42,5 +44,5 @@ func (t *text) Draw() error {
 		return err
 	}
 	srf.Free()
-	return global.Renderer.CopyEx(txt, nil, math.SDLRect(t.model.Collider), 0, nil, sdl.FLIP_NONE)
+	return global.Renderer.CopyEx(txt, nil, math.SDLRect(t.model.Collider.Add(t.GetPosition().IntVector())), 0, nil, sdl.FLIP_NONE)
 }
