@@ -66,6 +66,7 @@ pause:
     button_right:
       parts:
         - frames: 3
+          flip: 1
       collider:
         w: 64
         h: 64
@@ -73,7 +74,6 @@ pause:
       base_size:
         x: 1920
         y: 1080
-      render_flip: 1
     text:
       collider:
         w: 200
@@ -120,8 +120,8 @@ game_over:
       parts:
         - frames: 3
           on_texture:
-            w: 256
-            h: 128
+            - w: 256
+              h: 128
       collider:
         w: 512
         h: 256

@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	backgroundSpeed = 11
+	backgroundSpeed = 10
 )
 
 type background struct {
@@ -36,10 +36,10 @@ func (b *background) init() {
 	x := int32(b.pos.X)
 	y := int32(b.pos.Y)
 
-	b.model.Parts[0].OnTexture = math.Rect{W: b.model.Collider.W, H: b.model.Collider.H}
-	b.model.Parts[0].OnModel = math.Rect{X: x, Y: y, W: width, H: height}
-	b.model.Parts[1].OnTexture = math.Rect{H: b.model.Collider.H}
-	b.model.Parts[1].OnModel = math.Rect{X: x + width, Y: y, H: height}
+	b.model.Parts[0].OnTexture[0] = math.Rect{W: b.model.Collider.W, H: b.model.Collider.H}
+	b.model.Parts[0].OnModel[0] = math.Rect{X: x, Y: y, W: width, H: height}
+	b.model.Parts[1].OnTexture[0] = math.Rect{H: b.model.Collider.H}
+	b.model.Parts[1].OnModel[0] = math.Rect{X: x + width, Y: y, H: height}
 
 	b.scrollLine = width
 }
@@ -58,15 +58,15 @@ func (b *background) Update() error {
 		b.scrollLine = width - b.scrollLine
 	}
 
-	b.model.Parts[0].OnTexture.X = (width - b.scrollLine) * b.model.Collider.W / width
-	b.model.Parts[0].OnTexture.W = b.scrollLine * b.model.Collider.W / width
-	b.model.Parts[0].OnModel.W = b.scrollLine
-	b.model.Parts[0].OnModel.H = height
+	b.model.Parts[0].OnTexture[0].X = (width - b.scrollLine) * b.model.Collider.W / width
+	b.model.Parts[0].OnTexture[0].W = b.scrollLine * b.model.Collider.W / width
+	b.model.Parts[0].OnModel[0].W = b.scrollLine
+	b.model.Parts[0].OnModel[0].H = height
 
-	b.model.Parts[1].OnTexture.W = (width - b.scrollLine) * b.model.Collider.W / width
-	b.model.Parts[1].OnModel.W = width - b.scrollLine
-	b.model.Parts[1].OnModel.H = height
-	b.model.Parts[1].OnModel.X = b.scrollLine
+	b.model.Parts[1].OnTexture[0].W = (width - b.scrollLine) * b.model.Collider.W / width
+	b.model.Parts[1].OnModel[0].W = width - b.scrollLine
+	b.model.Parts[1].OnModel[0].H = height
+	b.model.Parts[1].OnModel[0].X = b.scrollLine
 
 	return nil
 }

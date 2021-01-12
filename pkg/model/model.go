@@ -28,10 +28,10 @@ type Model struct {
 	IgnoreCam bool `yaml:"ignore_cam"`
 	// texture path
 	Path string `yaml:"texture_path"`
-	// flip value, 0 = none; 1 = horizontal; 2 = vertical; 3 = both
-	Flip sdl.RendererFlip `yaml:"render_flip"`
 	// window size this model was created for
 	BaseSize math.IntVector `yaml:"base_size"`
+	// !TBA! shell all model be flipped around center of collider
+	GlobalFlip sdl.RendererFlip `yaml:"global_flip"`
 
 	t *sdl.Texture
 }
@@ -45,15 +45,33 @@ func (m Model) GetCopy() Model {
 	}
 	for _, p := range m.Parts {
 		prt := *p
-		if prt.OnModel.Empty() {
-			prt.OnModel = n.Collider
+		switch {
+		case prt.Frames > 1 && len(prt.OnTexture) == 1:
+			if len(prt.OnModel) == 0 {
+				prt.OnModel = make([]math.Rect, 0, prt.Frames)
+				prt.OnModel = append(prt.OnModel, n.Collider)
+			}
+			for i := 1; i < prt.Frames; i++ {
+				prt.OnTexture = append(prt.OnTexture, prt.OnTexture[0].Add(math.NewIntVector(n.Collider.W*int32(i), 0)))
+				prt.OnModel = append(prt.OnModel, prt.OnModel[0])
+			}
+		case prt.Frames != 0:
+			prt.OnModel = make([]math.Rect, p.Frames)
+			prt.OnTexture = make([]math.Rect, p.Frames)
+			for i := range prt.OnTexture {
+				prt.OnTexture[i] = n.Collider.Add(math.NewIntVector(n.Collider.W*int32(i), 0))
+				prt.OnModel[i] = n.Collider
+			}
 		}
-		if prt.OnTexture.Empty() {
-			prt.OnTexture = n.Collider
+
+		if prt.CenterPoint.X == 0 && prt.CenterPoint.Y == 0 {
+			prt.CenterPoint = n.Center()
+		}
+		if prt.Pivot.X == 0 && prt.Pivot.Y == 0 {
+			prt.Pivot = n.Center()
 		}
 		n.Parts = append(n.Parts, &prt)
 	}
-
 	return n
 }
 
@@ -62,15 +80,9 @@ func (m *Model) Center() math.IntVector {
 }
 
 // if to < 0 || to >= frames - go to next sprite
-func (m *Model) ChangeSprites(to int32) {
+func (m *Model) ChangeSprites(to int) {
 	for _, s := range m.Parts {
-		s.Frame++
-		if s.Frame >= s.Frames {
-			s.Frame = 0
-		}
-		if to >= 0 && to < s.Frames {
-			s.Frame = to
-		}
+		s.ChangeSprites(to)
 	}
 }
 
@@ -112,9 +124,9 @@ func (m *Model) Destroy() error {
 
 type Part struct {
 	// Rectangle used on real world
-	OnModel math.Rect `yaml:"on_model"`
+	OnModel []math.Rect `yaml:"on_model"`
 	// Rectangle used on texture place
-	OnTexture math.Rect `yaml:"on_texture"`
+	OnTexture []math.Rect `yaml:"on_texture"`
 	// point to rotate this part around
 	Pivot math.IntVector `yaml:"pivot"`
 	// current rotation of this part
@@ -125,13 +137,22 @@ type Part struct {
 	MinAngle math.AngleDeg `yaml:"min_angle"`
 	// lightning of texture
 	Alpha uint8 `yaml:"alpha"`
-	// amount of frames in part's texture
-	Frames int32 `yaml:"frames"`
 	// current frame of animation
-	Frame int32 `yaml:"frame"`
+	Frame int `yaml:"frame"`
+	// used if all frames are copy of each other but moved right
+	Frames int `yaml:"frames"`
+	// should part be in flipped state, 0 = none; 1 = horizontal; 2 = vertical; 3 = both
+	Flip sdl.RendererFlip `yaml:"flip"`
+	// point to be flipped around
+	CenterPoint math.IntVector `yaml:"center"`
+	// should model be drawn
+	Hidden bool `yaml:"hidden"`
 }
 
 func (p Part) draw(m *Model, where math.IntVector) error {
+	if p.Hidden {
+		return nil
+	}
 	mod, err := m.t.GetAlphaMod()
 	if err != nil {
 		return err
@@ -141,16 +162,17 @@ func (p Part) draw(m *Model, where math.IntVector) error {
 	}
 	// TODO not precise, need better method of combining rotations
 	// TODO add flip here
-	p.OnTexture.X += p.OnTexture.W * p.Frame
-	if m.Flip&sdl.FLIP_HORIZONTAL != 0 {
-		cX := m.Center().X
-		p.OnModel.X = cX - (p.OnModel.X - cX) - p.OnModel.W
-		p.Pivot.X = p.OnModel.W - p.Pivot.X
+	rect := p.OnModel[p.Frame]
+	if p.Flip&sdl.FLIP_HORIZONTAL != 0 {
+		cX := p.CenterPoint.X
+		rect.X = cX - (rect.X - cX) - rect.W
+		p.Pivot.X = p.OnModel[p.Frame].W - p.Pivot.X
 		tmp := p.MaxAngle
 		p.MaxAngle = -p.MinAngle
 		p.MinAngle = -tmp
 		p.Angle = -p.Angle
 	}
+
 	if p.Angle > p.MaxAngle && p.MaxAngle-p.MinAngle != 0 {
 		p.Angle = p.MaxAngle
 	}
@@ -158,17 +180,29 @@ func (p Part) draw(m *Model, where math.IntVector) error {
 		p.Angle = p.MinAngle
 	}
 
-	if err = global.Renderer.CopyEx(m.t, math.SDLRect(p.OnTexture), math.SDLRect(p.OnModel.Add(where)), float64(p.Angle+m.Angle), math.SDLPoint(p.Pivot), m.Flip); err != nil {
+	if err = global.Renderer.CopyEx(m.t, math.SDLRect(p.OnTexture[p.Frame]), math.SDLRect(rect.Add(where)), float64(p.Angle+m.Angle), math.SDLPoint(p.Pivot), p.Flip); err != nil {
 		return err
 	}
 	return m.t.SetAlphaMod(mod)
 }
 
-func (p Part) GetPivotPoint(where math.IntVector, m *Model) math.IntVector {
-	if m.Flip&sdl.FLIP_HORIZONTAL != 0 {
-		cX := m.Center().X
-		p.OnModel.X = cX - (p.OnModel.X - cX) - p.OnModel.W
-		p.Pivot.X = p.OnModel.W - p.Pivot.X
+func (p Part) GetPivotPoint(where math.IntVector) math.IntVector {
+	rect := p.OnModel[p.Frame]
+	if p.Flip&sdl.FLIP_HORIZONTAL != 0 {
+		cX := p.CenterPoint.X
+		rect.X = cX - (rect.X - cX) - rect.W
+		p.Pivot.X = p.OnModel[p.Frame].W - p.Pivot.X
 	}
-	return p.OnModel.GetPos().Add(where).Add(p.Pivot)
+	return rect.GetPos().Add(where).Add(p.Pivot)
+}
+
+// if to < 0 || to >= frames - go to next sprite
+func (p *Part) ChangeSprites(to int) {
+	p.Frame++
+	if p.Frame >= len(p.OnModel) {
+		p.Frame = 0
+	}
+	if to >= 0 && to < len(p.OnModel) {
+		p.Frame = to
+	}
 }

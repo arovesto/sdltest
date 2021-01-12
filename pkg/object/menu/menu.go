@@ -76,7 +76,10 @@ func (m *menuObject) updateModelAfterScaleChange(oldScale, newScale math.IntVect
 	m.model.Collider = m.model.Collider.Mul(newScale).Div(oldScale)
 	for _, p := range m.model.Parts {
 		p.Pivot = p.Pivot.Mul(newScale).Div(oldScale)
-		p.OnModel = p.OnModel.Mul(newScale).Div(oldScale)
+		p.CenterPoint = p.CenterPoint.Mul(newScale).Div(oldScale)
+		for i := range p.OnModel {
+			p.OnModel[i] = p.OnModel[i].Mul(newScale).Div(oldScale)
+		}
 	}
 }
 

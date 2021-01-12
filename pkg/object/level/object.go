@@ -63,11 +63,16 @@ func (s *shooterObject) Draw() error {
 	return s.model.Draw(s.pos.IntVector())
 }
 
-func (s *shooterObject) changeSprite() {
+func (s *shooterObject) changeSprite(part int) {
 	now := sdl.GetTicks()
 	if now-s.spriteChanged > animationTime {
 		s.spriteChanged = now
-		s.model.ChangeSprites(-1)
+		if part < 0 {
+			s.model.ChangeSprites(-1)
+		} else {
+			s.model.Parts[part].ChangeSprites(-1)
+		}
+
 	}
 }
 

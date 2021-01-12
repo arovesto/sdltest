@@ -27,33 +27,51 @@ hill:
   ignore_cam: true
 tank:
   parts:
-    - frames: 1
-      on_texture:
-        y: 72
-        w: 64
-        h: 12
+    - on_texture:
+        - y: 48
+          w: 56
+          h: 12
       on_model:
-        x: 84
-        y: 12
-        w: 64
-        h: 12
+        - x: 84
+          y: 12
+          w: 56
+          h: 12
       pivot:
         x: 4
         y: 4
-      max_angle: 10
+      center:
+        x: 68
+      max_angle: 6
       min_angle: -30
-    - frames: 3
-      on_texture:
-        y: 8
-        w: 128
-        h: 56
+    - on_texture:
+        - y: 68
+          w: 56
+          h: 16
+        - y: 68
+          x: 60
+          w: 68
+          h: 16
       on_model:
-        y: 8
-        w: 128
-        h: 56
+        - x: 40
+          y: 8
+          w: 56
+          h: 16
+        - x: 32
+          y: 8
+          w: 68
+          h: 16
       pivot:
-        x: 64
-        y: 34
+        x: 100
+      center:
+        x: 68
+    - frames: 4
+      on_texture:
+        - w: 128
+          h: 40
+      on_model:
+        - y: 24
+          w: 128
+          h: 40
   texture_path: "assets/tank.png"
   collider:
     y: 8
@@ -61,18 +79,23 @@ tank:
     h: 56
 evil_tank:
   parts:
-    - frames: 3
+    - frames: 4
       on_texture:
-        y: 8
-        w: 128
-        h: 56
+        - y: 8
+          w: 128
+          h: 56
       on_model:
-        y: 8
-        w: 128
-        h: 56
+        - y: 8
+          w: 128
+          h: 56
+      flip: 1
   texture_path: "assets/evil-tank.png"
-  render_flip: 1
   collider:
     y: 8
     w: 128
     h: 56
+  entity_collider:
+    x: 4
+    y: 12
+    w: 124
+    h: 52
