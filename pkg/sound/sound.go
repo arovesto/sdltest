@@ -24,12 +24,15 @@ type Manager struct {
 }
 
 func init() {
-	if err := mix.Init(mix.INIT_FLAC | mix.INIT_MP3); err != nil {
-		panic(err)
-	}
 	if err := mix.OpenAudio(mix.DEFAULT_FREQUENCY, sdl.AUDIO_S16, 2, 4096); err != nil {
 		panic(err)
 	}
+	if err := mix.Init(mix.INIT_FLAC | mix.INIT_MP3); err != nil {
+		panic(err)
+	}
+	//if err := mix.OpenAudio(mix.DEFAULT_FREQUENCY, sdl.AUDIO_S16, 2, 4096); err != nil {
+	//	panic(err)
+	//}
 	mix.Volume(-1, 16)
 	m = &Manager{sfxs: map[string]*mix.Chunk{}, music: map[string]*mix.Music{}, volume: mix.Volume(-1, -1)}
 }
