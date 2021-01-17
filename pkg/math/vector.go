@@ -174,15 +174,3 @@ func (r Rect) Add(v IntVector) Rect {
 func (r Rect) Empty() bool {
 	return r.X == 0 && r.Y == 0 && r.W == 0 && r.H == 0
 }
-
-type AngleDeg float64 // clockwise from X axis
-
-type AngleRad float64 // clockwise from X axis
-
-func (a AngleRad) Deg() AngleDeg {
-	return AngleDeg(180 * a / math.Pi)
-}
-
-func AngleOn(from, to Vector2D) AngleDeg {
-	return AngleRad(math.Atan((to.Y - from.Y) / math.Abs(to.X-from.X))).Deg()
-}

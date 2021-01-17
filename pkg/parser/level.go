@@ -83,6 +83,7 @@ func ParseLevel(levelFile, modelsFile string) (*level.Level, error) {
 	if err != nil {
 		return nil, err
 	}
+	model.AvailableModels = models
 
 	contents, err := ioutil.ReadFile(levelFile)
 	if err != nil {
@@ -98,9 +99,6 @@ func ParseLevel(levelFile, modelsFile string) (*level.Level, error) {
 		t.DrawHeight = format.TileHeight
 	}
 
-	var collisionObjects []object.GameObject
-	var collisionTileLayers []*level.TileLayer
-
 	var layers []level.Layer
 	for _, n := range format.Nodes {
 		c := false
@@ -113,7 +111,8 @@ func ParseLevel(levelFile, modelsFile string) (*level.Level, error) {
 		case "objectgroup":
 			var objects []object.GameObject
 			for _, o := range n.Objects {
-				state := object.Properties{Pos: math.NewVec(o.X, o.Y)}
+				id := global.NewID()
+				state := object.Properties{Pos: math.NewVec(o.X, o.Y), ID: id}
 				for _, p := range o.Properties.Property {
 					switch p.Name {
 					case "model":
@@ -126,14 +125,11 @@ func ParseLevel(levelFile, modelsFile string) (*level.Level, error) {
 				}
 				if obj, err := factory.Create(o.Type, state); err == nil {
 					objects = append(objects, obj)
-					if c {
-						collisionObjects = append(collisionObjects, obj)
-					}
 				} else {
 					return nil, err
 				}
 			}
-			layers = append(layers, level.NewObjectLayer(objects))
+			layers = append(layers, level.NewObjectLayer(objects, c))
 		case "layer":
 			data, err := base64.StdEncoding.DecodeString(strings.TrimSpace(n.Data))
 			if err != nil {
@@ -161,12 +157,9 @@ func ParseLevel(levelFile, modelsFile string) (*level.Level, error) {
 
 			layer := level.NewTileLayer(format.TileWidth, format.TileSets, m, c)
 			layers = append(layers, layer)
-			if c {
-				collisionTileLayers = append(collisionTileLayers, layer)
-			}
 		}
 	}
-	return level.NewLevel(format.TileSets, append([]level.Layer{level.NewCollisionLayer(collisionObjects, collisionTileLayers)}, layers...)), nil
+	return level.NewLevel(format.TileSets, layers), nil
 }
 
 func readInts(r io.Reader) (ids []int, err error) {

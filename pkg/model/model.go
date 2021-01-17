@@ -12,6 +12,8 @@ const (
 	alpha = 255
 )
 
+var AvailableModels = map[string]Model{}
+
 // TODO some kind ot relative model for scaling menus
 type Model struct {
 	// Model contains it's parts. Parts are rendered in order them appear in array
@@ -20,7 +22,7 @@ type Model struct {
 	EntityCollider math.Rect `yaml:"entity_collider"`
 	// relative to position collision rectangle. Should be used on collisions with terrain
 	Collider math.Rect `yaml:"collider"`
-	// FIXME (not working) model rotation angle, around the center of Collider (collision is not affected by this)
+	// TODO model rotation angle, around the center of Collider (collision is not affected by this)
 	Angle math.AngleDeg `yaml:"angle"`
 	// model brightness setting
 	Alpha uint8 `yaml:"alpha"`
@@ -30,13 +32,13 @@ type Model struct {
 	Path string `yaml:"texture_path"`
 	// window size this model was created for
 	BaseSize math.IntVector `yaml:"base_size"`
-	// !TBA! shell all model be flipped around center of collider
+	// shell all model be flipped around center of collider
 	GlobalFlip sdl.RendererFlip `yaml:"global_flip"`
 
 	t *sdl.Texture
 }
 
-func (m Model) GetCopy() Model {
+func (m Model) GetCopy() *Model {
 	n := m
 	n.Parts = make([]*Part, 0, len(m.Parts))
 	n.Alpha = alpha
@@ -45,6 +47,7 @@ func (m Model) GetCopy() Model {
 	}
 	for _, p := range m.Parts {
 		prt := *p
+		prt.m = &n
 		switch {
 		case prt.Frames > 1 && len(prt.OnTexture) == 1:
 			if len(prt.OnModel) == 0 {
@@ -72,7 +75,7 @@ func (m Model) GetCopy() Model {
 		}
 		n.Parts = append(n.Parts, &prt)
 	}
-	return n
+	return &n
 }
 
 func (m *Model) Center() math.IntVector {
@@ -108,7 +111,7 @@ func (m *Model) Draw(where math.IntVector) error {
 		where = where.Sub(camera.Camera.Pos.IntVector())
 	}
 	for _, p := range m.Parts {
-		if err := p.draw(m, where); err != nil {
+		if err := p.draw(where); err != nil {
 			return err
 		}
 	}
@@ -147,22 +150,53 @@ type Part struct {
 	CenterPoint math.IntVector `yaml:"center"`
 	// should model be drawn
 	Hidden bool `yaml:"hidden"`
+
+	m *Model
 }
 
-func (p Part) draw(m *Model, where math.IntVector) error {
+func (p Part) draw(where math.IntVector) error {
 	if p.Hidden {
 		return nil
 	}
-	mod, err := m.t.GetAlphaMod()
+	mod, err := p.m.t.GetAlphaMod()
 	if err != nil {
 		return err
 	}
-	if err = m.t.SetAlphaMod(p.Alpha + m.Alpha); err != nil {
+	if err = p.m.t.SetAlphaMod(p.Alpha + p.m.Alpha); err != nil {
 		return err
 	}
-	// TODO not precise, need better method of combining rotations
-	// TODO add flip here
+
+	rect, pivot, _, angle := p.GetTruePivotAndAngle()
+
+	if err = global.Renderer.CopyEx(p.m.t, math.SDLRect(p.OnTexture[p.Frame]), math.SDLRect(rect.Add(where)), float64(angle+p.m.Angle), math.SDLPoint(pivot), p.Flip); err != nil {
+		return err
+	}
+	return p.m.t.SetAlphaMod(mod)
+}
+
+func (p Part) GetPivot(where math.IntVector) math.IntVector {
+	r, _, _, _ := p.GetTruePivotAndAngle()
+	return r.GetPos().Add(where).Add(p.Pivot)
+}
+
+func (p Part) GetAngle() math.AngleDeg {
+	_, _, _, a := p.GetTruePivotAndAngle()
+	if p.Flip&sdl.FLIP_HORIZONTAL != 0 {
+		return a - 180
+	}
+	return a
+}
+
+// TODO not precise, need better method of combining rotations
+// TODO probably should set state to itself too
+func (p Part) GetTruePivotAndAngle() (math.Rect, math.IntVector, math.IntVector, math.AngleDeg) {
 	rect := p.OnModel[p.Frame]
+	if p.m.GlobalFlip&sdl.FLIP_HORIZONTAL != 0 {
+		cX := p.m.Center().X
+		oldCx := p.CenterPoint.X
+		p.CenterPoint.X = cX - (p.CenterPoint.X - cX)
+		rect.X -= oldCx - p.CenterPoint.X
+	}
 	if p.Flip&sdl.FLIP_HORIZONTAL != 0 {
 		cX := p.CenterPoint.X
 		rect.X = cX - (rect.X - cX) - rect.W
@@ -180,20 +214,16 @@ func (p Part) draw(m *Model, where math.IntVector) error {
 		p.Angle = p.MinAngle
 	}
 
-	if err = global.Renderer.CopyEx(m.t, math.SDLRect(p.OnTexture[p.Frame]), math.SDLRect(rect.Add(where)), float64(p.Angle+m.Angle), math.SDLPoint(p.Pivot), p.Flip); err != nil {
-		return err
-	}
-	return m.t.SetAlphaMod(mod)
+	return rect, p.Pivot, p.CenterPoint, p.Angle
 }
 
-func (p Part) GetPivotPoint(where math.IntVector) math.IntVector {
-	rect := p.OnModel[p.Frame]
-	if p.Flip&sdl.FLIP_HORIZONTAL != 0 {
-		cX := p.CenterPoint.X
-		rect.X = cX - (rect.X - cX) - rect.W
-		p.Pivot.X = p.OnModel[p.Frame].W - p.Pivot.X
+func (p *Part) ClampAngle() {
+	if p.Angle > p.MaxAngle && p.MaxAngle-p.MinAngle != 0 {
+		p.Angle = p.MaxAngle
 	}
-	return rect.GetPos().Add(where).Add(p.Pivot)
+	if p.Angle < p.MinAngle && p.MaxAngle-p.MinAngle != 0 {
+		p.Angle = p.MinAngle
+	}
 }
 
 // if to < 0 || to >= frames - go to next sprite

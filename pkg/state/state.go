@@ -16,5 +16,4 @@ var (
 	Menu     State
 	Play     State
 	GameOver State
-	Between  State
 )

@@ -9,10 +9,6 @@ import (
 )
 
 const (
-	NOType object.Type = iota
-	EnemyType
-	PlayerType
-
 	maxSpeed      = 10
 	animationTime = 200
 )
@@ -29,17 +25,20 @@ type shooterObject struct {
 	dead     bool
 	dying    bool
 
-	model         model.Model
+	model         *model.Model
 	spriteChanged uint32
+
+	maxSpeed float64
 
 	id global.ID
 }
 
 func newShooterObj(st object.Properties) shooterObject {
 	return shooterObject{
-		pos:   st.Pos,
-		model: st.Model,
-		id:    global.NewID(),
+		pos:      st.Pos,
+		model:    st.Model,
+		id:       st.ID,
+		maxSpeed: maxSpeed,
 	}
 }
 
@@ -49,11 +48,11 @@ func (s *shooterObject) Update() error {
 	s.vel = math.ClampDirection(s.vel, s.grP, s.grN)
 
 	s.vel = s.vel.Add(s.acc)
-	if math.AbsF(s.vel.X) > math.AbsF(maxSpeed) {
-		s.vel.X = maxSpeed * math.SignF(s.vel.X)
+	if math.AbsF(s.vel.X) > math.AbsF(s.maxSpeed) {
+		s.vel.X = s.maxSpeed * math.SignF(s.vel.X)
 	}
-	if math.AbsF(s.vel.Y) > math.AbsF(maxSpeed) {
-		s.vel.Y = maxSpeed * math.SignF(s.vel.Y)
+	if math.AbsF(s.vel.Y) > math.AbsF(s.maxSpeed) {
+		s.vel.Y = s.maxSpeed * math.SignF(s.vel.Y)
 	}
 	s.pos = s.pos.Add(s.vel)
 	return nil
@@ -93,7 +92,7 @@ func (s *shooterObject) GetObjectCollider() math.Rect {
 }
 
 func (s *shooterObject) GetType() object.Type {
-	return NOType
+	return object.NOType
 }
 
 func (s *shooterObject) BackOff(isGroundedP, isGroundedN, delta math.Vector2D) {

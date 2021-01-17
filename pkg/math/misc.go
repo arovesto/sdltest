@@ -1,6 +1,10 @@
 package math
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"math"
+
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 func DivIfCan(a, b int32) int32 {
 	absA, absB := Abs(a), Abs(b)
@@ -82,4 +86,25 @@ func ClampAngle(a, max AngleDeg) AngleDeg {
 		return -max
 	}
 	return a
+}
+
+type AngleDeg float64 // clockwise from X axis
+
+type AngleRad float64 // clockwise from X axis
+
+func (a AngleRad) Deg() AngleDeg {
+	return AngleDeg(180 * a / math.Pi)
+}
+
+func (a AngleDeg) ToVec() Vector2D {
+	raw := float64(a.ToRad())
+	return NewVec(math.Cos(raw), math.Sin(raw))
+}
+
+func (a AngleDeg) ToRad() AngleRad {
+	return AngleRad(a * math.Pi / 180)
+}
+
+func AngleOn(from, to Vector2D) AngleDeg {
+	return AngleRad(math.Atan((to.Y - from.Y) / math.Abs(to.X-from.X))).Deg()
 }

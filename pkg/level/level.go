@@ -3,6 +3,7 @@ package level
 import (
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/math"
+	"github.com/arovesto/sdl/pkg/object"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -10,13 +11,42 @@ import (
 type Level struct {
 	sets   []*TileSet
 	layers []Layer
+
+	mainLayer           *objectLayer
+	collisionTileLayers []*tileLayer
+
+	player object.GameObject
 }
 
+var CurrentLevel *Level
+
 func NewLevel(s []*TileSet, l []Layer) *Level {
-	return &Level{sets: s, layers: l}
+	lvl := &Level{sets: s, layers: l}
+
+	for _, layer := range l {
+		switch l := layer.(type) {
+		case *objectLayer:
+			if l.collision {
+				lvl.mainLayer = l
+			}
+			for _, o := range l.objects {
+				if o.GetType() == object.PlayerType {
+					lvl.player = o
+				}
+			}
+		case *tileLayer:
+			if l.collision {
+				lvl.collisionTileLayers = append(lvl.collisionTileLayers, l)
+			}
+		}
+	}
+	return lvl
 }
 
 func (l *Level) Update() (err error) {
+	if err = l.mainLayer.Collision(l.collisionTileLayers); err != nil {
+		return err
+	}
 	for _, l := range l.layers {
 		if err = l.Update(); err != nil {
 			return
@@ -32,6 +62,25 @@ func (l *Level) Render() (err error) {
 		}
 	}
 	return
+}
+
+func (l *Level) GetPlayer() object.GameObject {
+	return l.player
+}
+
+func (l *Level) NewObj(gameObject object.GameObject) {
+	l.mainLayer.objects = append(l.mainLayer.objects, gameObject)
+}
+
+// TODO implement some better datastructure to allow order + fast inserts and deletes
+func (l *Level) DelObject(gameObject object.GameObject) {
+	for i, obj := range l.mainLayer.objects {
+		if obj == gameObject {
+			l.mainLayer.objects[i] = l.mainLayer.objects[len(l.mainLayer.objects)-1]
+			l.mainLayer.objects = l.mainLayer.objects[:len(l.mainLayer.objects)-1]
+			return
+		}
+	}
 }
 
 func (l *Level) Destroy() error {

@@ -22,7 +22,16 @@ type Type int
 
 type Properties struct {
 	Pos       math.Vector2D
-	Model     model.Model
+	Model     *model.Model
 	AnimSpeed uint32
 	Callback  global.ID
+	ID        global.ID
 }
+
+const (
+	NOType Type = iota
+	EnemyType
+	PlayerType
+	BulletType
+	NoTypeMenuObject
+)

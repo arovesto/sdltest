@@ -99,3 +99,17 @@ evil_tank:
     y: 12
     w: 124
     h: 52
+
+bullet:
+  parts:
+    - frames: 1
+      on_texture:
+        - w: 16
+          h: 16
+      on_model:
+        - w: 32
+          h: 32
+  texture_path: "assets/bullet.png"
+  collider:
+    w: 32
+    h: 32

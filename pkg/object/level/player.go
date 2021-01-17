@@ -4,6 +4,7 @@ import (
 	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/game/global"
 	"github.com/arovesto/sdl/pkg/input"
+	"github.com/arovesto/sdl/pkg/level"
 	"github.com/arovesto/sdl/pkg/math"
 	"github.com/arovesto/sdl/pkg/object"
 	"github.com/arovesto/sdl/pkg/sound"
@@ -23,12 +24,8 @@ type player struct {
 	rotating   bool
 }
 
-var MainPlayer *player
-
 func NewPlayer(st object.Properties) object.GameObject {
-	p := &player{shooterObject: newShooterObj(st)}
-	MainPlayer = p
-	return p
+	return &player{shooterObject: newShooterObj(st)}
 }
 
 func (p *player) Update() (err error) {
@@ -40,6 +37,9 @@ func (p *player) Update() (err error) {
 
 func (p *player) handleInput() error {
 	now := sdl.GetTicks()
+	mousePos := input.GetMousePositionInCamera().FloatV()
+	pivotPos := p.model.Parts[0].GetPivot(p.pos.IntVector()).FloatV()
+
 	// TODO predicate of action
 	if input.GetMousePressed(input.LEFT) && now-p.shootAt > 1000 && !p.rotating {
 		// TODO setting action off
@@ -48,7 +48,16 @@ func (p *player) handleInput() error {
 		if err := sound.PlaySound("shot", 0); err != nil {
 			return err
 		}
+		level.CurrentLevel.NewObj(NewBullet(pivotPos, p.model.Parts[0].GetAngle().ToVec().Mul(15)))
 	}
+
+	if input.IsKeyDown(sdl.SCANCODE_E) {
+		p.model.Angle -= 0.05
+	}
+	if input.IsKeyDown(sdl.SCANCODE_Q) {
+		p.model.Angle += 0.05
+	}
+
 	// TODO predicate of action
 	if now-p.rotatingAt > 400 && p.rotating {
 		// TODO setting action off
@@ -60,11 +69,7 @@ func (p *player) handleInput() error {
 	if input.IsKeyDown(sdl.SCANCODE_W) {
 		p.vel.Y = -4
 	}
-	mousePos := input.GetMousePositionInCamera().FloatV()
-	pivotPos := p.model.Parts[0].GetPivotPoint(p.pos.IntVector()).FloatV()
-	requiredAngle := math.AngleOn(pivotPos, mousePos)
 
-	p.model.Parts[0].Angle += math.ClampAngle(requiredAngle-p.model.Parts[0].Angle, gunSpeed)
 	oldFlip := p.model.Parts[0].Flip
 	// TODO action callbackNotHappen
 	if mousePos.X-pivotPos.X > 40 && !p.rotating {
@@ -73,6 +78,10 @@ func (p *player) handleInput() error {
 	if mousePos.X-pivotPos.X < -40 && !p.rotating {
 		p.model.Parts[0].Flip = sdl.FLIP_HORIZONTAL
 	}
+
+	requiredAngle := math.AngleOn(pivotPos, mousePos)
+	p.model.Parts[0].Angle += math.ClampAngle(requiredAngle-p.model.Parts[0].Angle, gunSpeed)
+	p.model.Parts[0].ClampAngle()
 
 	if oldFlip != p.model.Parts[0].Flip {
 		// TODO setting action off
@@ -117,9 +126,12 @@ func (p *player) handleInput() error {
 }
 
 func (p *player) GetType() object.Type {
-	return PlayerType
+	return object.PlayerType
 }
 
 func (p *player) Collide(other object.GameObject) error {
-	return global.GetMachine().ChangeState(state.GameOver)
+	if other.GetType() == object.EnemyType {
+		return global.GetMachine().ChangeState(state.GameOver)
+	}
+	return nil
 }

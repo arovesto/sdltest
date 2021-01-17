@@ -7,10 +7,6 @@ import (
 	"github.com/arovesto/sdl/pkg/object"
 )
 
-const (
-	NoTypeMenuObject object.Type = iota
-)
-
 type Callback func() error
 type TextCallback func() (string, error)
 
@@ -27,7 +23,7 @@ func SetCallbacks(obj []object.GameObject, clb []Callback, tlb []TextCallback) {
 
 type menuObject struct {
 	relPos math.Vector2D
-	model  model.Model
+	model  *model.Model
 
 	screen math.IntVector
 }
@@ -67,7 +63,7 @@ func (m *menuObject) GetObjectCollider() math.Rect {
 }
 
 func (m *menuObject) GetType() object.Type {
-	return NoTypeMenuObject
+	return object.NoTypeMenuObject
 }
 
 func (m *menuObject) BackOff(isGroundedP, isGroundedN, delta math.Vector2D) {}

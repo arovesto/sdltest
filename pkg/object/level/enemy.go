@@ -2,6 +2,7 @@ package level
 
 import (
 	"github.com/arovesto/sdl/pkg/camera"
+	"github.com/arovesto/sdl/pkg/level"
 	"github.com/arovesto/sdl/pkg/math"
 	"github.com/arovesto/sdl/pkg/object"
 )
@@ -16,11 +17,11 @@ func NewEnemy(st object.Properties) object.GameObject {
 }
 
 func (e *enemy) GetType() object.Type {
-	return EnemyType
+	return object.EnemyType
 }
 
 func (e *enemy) Update() error {
-	dist := math.AbsF(MainPlayer.pos.X - e.pos.X)
+	dist := math.AbsF(level.CurrentLevel.GetPlayer().GetPosition().X - e.pos.X)
 	var w float64
 	switch {
 	case dist <= 1000:
@@ -39,4 +40,9 @@ func (e *enemy) Update() error {
 		delete(camera.Camera.Targets, e.id)
 	}
 	return e.shooterObject.Update()
+}
+
+func (e *enemy) Collide(other object.GameObject) error {
+	level.CurrentLevel.DelObject(e)
+	return nil
 }

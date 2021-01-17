@@ -17,7 +17,7 @@ type Layer interface {
 
 type Tiles [][]int
 
-type TileLayer struct {
+type tileLayer struct {
 	tileSize int32
 
 	sets  []*TileSet
@@ -26,11 +26,11 @@ type TileLayer struct {
 	collision bool
 }
 
-func NewTileLayer(tileSize int32, set []*TileSet, tiles Tiles, collision bool) *TileLayer {
-	return &TileLayer{sets: set, tiles: tiles, tileSize: tileSize, collision: collision}
+func NewTileLayer(tileSize int32, set []*TileSet, tiles Tiles, collision bool) *tileLayer {
+	return &tileLayer{sets: set, tiles: tiles, tileSize: tileSize, collision: collision}
 }
 
-func (l *TileLayer) Render() (err error) {
+func (l *tileLayer) Render() (err error) {
 	xCam, yCam, w, h := camera.Camera.GetRect().Values()
 	cols, rows := w/l.tileSize+1, h/l.tileSize+1
 	x, y := xCam/l.tileSize, yCam/l.tileSize
@@ -51,15 +51,15 @@ func (l *TileLayer) Render() (err error) {
 	return
 }
 
-func (l *TileLayer) Update() error {
+func (l *tileLayer) Update() error {
 	return nil
 }
 
-func (l *TileLayer) outside(b, a int32) bool {
+func (l *tileLayer) outside(b, a int32) bool {
 	return a >= int32(len(l.tiles)) || b >= int32(len(l.tiles[0])) || a < 0 || b < 0
 }
 
-func (l *TileLayer) BackOffVector(o object.GameObject) (isGroundedPositive, isGroundedNegative, delta math.Vector2D) {
+func (l *tileLayer) BackOffVector(o object.GameObject) (isGroundedPositive, isGroundedNegative, delta math.Vector2D) {
 	xP, yP, wP, hP := o.GetCollider().Values()
 
 	// TODO refactor me
@@ -90,7 +90,7 @@ func (l *TileLayer) BackOffVector(o object.GameObject) (isGroundedPositive, isGr
 	return
 }
 
-func (l *TileLayer) getTileSetByID(id int) *TileSet {
+func (l *tileLayer) getTileSetByID(id int) *TileSet {
 	for i := 0; i < len(l.sets)-1; i++ {
 		if id >= l.sets[i].FirstGID && id < l.sets[i+1].FirstGID {
 			return l.sets[i]
@@ -101,10 +101,12 @@ func (l *TileLayer) getTileSetByID(id int) *TileSet {
 
 type objectLayer struct {
 	objects []object.GameObject
+
+	collision bool
 }
 
-func NewObjectLayer(obj []object.GameObject) *objectLayer {
-	return &objectLayer{objects: obj}
+func NewObjectLayer(obj []object.GameObject, collision bool) *objectLayer {
+	return &objectLayer{objects: obj, collision: collision}
 }
 
 func (o *objectLayer) Render() (err error) {
@@ -125,24 +127,17 @@ func (o *objectLayer) Update() (err error) {
 	return
 }
 
-type collisionLayer struct {
-	tileLayers []*TileLayer
-	objects    []object.GameObject
-}
-
-func NewCollisionLayer(obj []object.GameObject, tl []*TileLayer) *collisionLayer {
-	return &collisionLayer{objects: obj, tileLayers: tl}
-}
-
-func (c *collisionLayer) Update() (err error) {
-	for _, o := range c.objects {
-		for _, tl := range c.tileLayers {
+func (o *objectLayer) Collision(tileLayers []*tileLayer) (err error) {
+	for _, o := range o.objects {
+		for _, tl := range tileLayers {
+			if !tl.collision {
+				continue
+			}
 			o.BackOff(tl.BackOffVector(o))
 		}
 	}
-
-	for _, o1 := range c.objects {
-		for _, o2 := range c.objects {
+	for _, o1 := range o.objects {
+		for _, o2 := range o.objects {
 			if o1 != o2 && math.Collide(o1.GetObjectCollider(), o2.GetObjectCollider()) {
 				if err = o1.Collide(o2); err != nil {
 					return
@@ -154,8 +149,4 @@ func (c *collisionLayer) Update() (err error) {
 		}
 	}
 	return
-}
-
-func (c *collisionLayer) Render() error {
-	return nil
 }
