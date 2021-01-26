@@ -33,8 +33,8 @@ func (b *bullet) Update() error {
 	return b.shooterObject.Update()
 }
 
-func (b *bullet) BackOff(isGroundedP, isGroundedN, delta math.Vector2D) {
-	if isGroundedP.X != 0 || isGroundedP.Y != 0 || isGroundedN.X != 0 || isGroundedN.Y != 0 {
+func (b *bullet) BackOff(gr object.BackOffInfo) {
+	if gr.UpGrounded || gr.DownGrounded || gr.LeftGrounded || gr.RightGrounded {
 		level.CurrentLevel.DelObject(b)
 	}
 }

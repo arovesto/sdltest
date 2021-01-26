@@ -18,8 +18,7 @@ type shooterObject struct {
 	vel math.Vector2D
 	acc math.Vector2D
 
-	grP math.Vector2D
-	grN math.Vector2D
+	gr object.BackOffInfo
 
 	updating bool
 	dead     bool
@@ -44,8 +43,8 @@ func newShooterObj(st object.Properties) shooterObject {
 
 func (s *shooterObject) Update() error {
 	s.acc.Y = 0.1
-	s.acc = math.ClampDirection(s.acc, s.grP, s.grN)
-	s.vel = math.ClampDirection(s.vel, s.grP, s.grN)
+	s.acc = math.ClampDirection(s.acc, s.gr.UpGrounded, s.gr.DownGrounded, s.gr.LeftGrounded, s.gr.RightGrounded)
+	s.vel = math.ClampDirection(s.vel, s.gr.UpGrounded, s.gr.DownGrounded, s.gr.LeftGrounded, s.gr.RightGrounded)
 
 	s.vel = s.vel.Add(s.acc)
 	if math.AbsF(s.vel.X) > math.AbsF(s.maxSpeed) {
@@ -95,15 +94,9 @@ func (s *shooterObject) GetType() object.Type {
 	return object.NOType
 }
 
-func (s *shooterObject) BackOff(isGroundedP, isGroundedN, delta math.Vector2D) {
-	s.grP = isGroundedP
-	s.grN = isGroundedN
-	if delta.X != 0 && (delta.X > 0) == (s.vel.X > 0) {
-		s.pos.X += delta.X
-	}
-	if delta.Y != 0 && (delta.Y > 0) == (s.vel.Y > 0) {
-		s.pos.Y += delta.Y
-	}
+func (s *shooterObject) BackOff(info object.BackOffInfo) {
+	s.gr = info
+	s.pos = s.pos.Add(s.gr.Delta)
 }
 
 func (s *shooterObject) Collide(o object.GameObject) error {

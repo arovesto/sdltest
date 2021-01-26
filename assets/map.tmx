@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="120" height="34" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="36">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="120" height="34" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="372">
  <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" spacing="1" tilecount="336" columns="24">
   <image source="tileset.png" width="791" height="461"/>
  </tileset>
@@ -14,14 +14,14 @@
   </object>
   <object id="12" name="Hills" type="background" x="0" y="0" width="1920" height="1088">
    <properties>
-    <property name="model" value="hills"/>
     <property name="animSpeed" value="8"/>
+    <property name="model" value="hills"/>
    </properties>
   </object>
   <object id="12" name="Hill" type="background" x="0" y="0" width="1920" height="1088">
    <properties>
-    <property name="model" value="hill"/>
     <property name="animSpeed" value="6"/>
+    <property name="model" value="hill"/>
    </properties>
   </object>
  </objectgroup>

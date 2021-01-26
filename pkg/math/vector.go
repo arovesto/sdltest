@@ -86,18 +86,18 @@ func Collide(a, b Rect) bool {
 	return aBottom >= bTop && aTop <= bBottom && aRight >= bLeft && aLeft <= bRight
 }
 
-func ClampDirection(a, b, c Vector2D) Vector2D {
-	if b.X > 0 && a.X > 0 {
+func ClampDirection(a Vector2D, blockUp, blockDown, blockLeft, blockRight bool) Vector2D {
+	if blockRight && a.X > 0 {
 		a.X = 0
 	}
-	if c.X < 0 && a.X < 0 {
+	if blockLeft && a.X < 0 {
 		a.X = 0
 	}
 
-	if b.Y > 0 && a.Y > 0 {
+	if blockDown && a.Y > 0 {
 		a.Y = 0
 	}
-	if c.Y < 0 && a.Y < 0 {
+	if blockUp && a.Y < 0 {
 		a.Y = 0
 	}
 	return a
@@ -122,6 +122,10 @@ func (v IntVector) Add(other IntVector) IntVector {
 
 func (v IntVector) Sub(other IntVector) IntVector {
 	return IntVector{X: v.X - other.X, Y: v.Y - other.Y}
+}
+
+func (v Vector2D) Abs() float64 {
+	return math.Abs(v.X) + math.Abs(v.Y)
 }
 
 func (v IntVector) Values() (int32, int32) {

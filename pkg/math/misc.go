@@ -108,3 +108,24 @@ func (a AngleDeg) ToRad() AngleRad {
 func AngleOn(from, to Vector2D) AngleDeg {
 	return AngleRad(math.Atan((to.Y - from.Y) / math.Abs(to.X-from.X))).Deg()
 }
+
+func LineIntersect(from1, to1, from2, to2 int32) bool {
+	return PointBetween(from1, to1, from2) || PointBetween(from2, to2, from1)
+}
+
+func RectIntersect(a, b Rect) bool {
+	return LineIntersect(a.X, a.X+a.W, b.X, b.X+b.W) && LineIntersect(a.Y, a.Y+a.H, b.Y, b.Y+b.H)
+}
+
+func PointBetween(from, to, between int32) bool {
+	return from <= between && between <= to
+}
+
+func PointsBetweenStrict(from, to, between int32) bool {
+	return from < between && between < to
+}
+
+func PointInRect(a Rect, p Vector2D) bool {
+	pInt := p.IntVector()
+	return PointBetween(a.X, a.X+a.W, pInt.X) && PointBetween(a.Y, a.Y+a.H, pInt.Y)
+}

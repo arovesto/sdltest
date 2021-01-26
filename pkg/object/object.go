@@ -15,7 +15,15 @@ type GameObject interface {
 	GetCollider() math.Rect
 	GetObjectCollider() math.Rect
 	GetType() Type
-	BackOff(isGroundedP, isGroundedN, delta math.Vector2D)
+	BackOff(info BackOffInfo)
+}
+
+type BackOffInfo struct {
+	LeftGrounded  bool
+	RightGrounded bool
+	UpGrounded    bool
+	DownGrounded  bool
+	Delta         math.Vector2D
 }
 
 type Type int

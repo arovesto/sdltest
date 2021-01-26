@@ -44,13 +44,13 @@ func NewLevel(s []*TileSet, l []Layer) *Level {
 }
 
 func (l *Level) Update() (err error) {
-	if err = l.mainLayer.Collision(l.collisionTileLayers); err != nil {
-		return err
-	}
 	for _, l := range l.layers {
 		if err = l.Update(); err != nil {
 			return
 		}
+	}
+	if err = l.mainLayer.Collision(l.collisionTileLayers); err != nil {
+		return err
 	}
 	return
 }
@@ -74,13 +74,7 @@ func (l *Level) NewObj(gameObject object.GameObject) {
 
 // TODO implement some better datastructure to allow order + fast inserts and deletes
 func (l *Level) DelObject(gameObject object.GameObject) {
-	for i, obj := range l.mainLayer.objects {
-		if obj == gameObject {
-			l.mainLayer.objects[i] = l.mainLayer.objects[len(l.mainLayer.objects)-1]
-			l.mainLayer.objects = l.mainLayer.objects[:len(l.mainLayer.objects)-1]
-			return
-		}
-	}
+	l.mainLayer.deletedIDs[gameObject] = struct{}{}
 }
 
 func (l *Level) Destroy() error {

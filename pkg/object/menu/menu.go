@@ -66,7 +66,7 @@ func (m *menuObject) GetType() object.Type {
 	return object.NoTypeMenuObject
 }
 
-func (m *menuObject) BackOff(isGroundedP, isGroundedN, delta math.Vector2D) {}
+func (m *menuObject) BackOff(object.BackOffInfo) {}
 
 func (m *menuObject) updateModelAfterScaleChange(oldScale, newScale math.IntVector) {
 	m.model.Collider = m.model.Collider.Mul(newScale).Div(oldScale)

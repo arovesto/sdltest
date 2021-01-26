@@ -46,8 +46,8 @@ func (b *background) init() {
 
 func (b *background) Update() error {
 	pos, _, width, height := camera.Camera.GetRect().Values()
-	if math.Abs(pos-b.prevCamPos) >= b.speed {
-		b.scrollLine -= (pos - b.prevCamPos) / b.speed
+	b.scrollLine -= (pos - b.prevCamPos) / b.speed
+	if (pos-b.prevCamPos)/b.speed != 0 {
 		b.prevCamPos = pos
 	}
 

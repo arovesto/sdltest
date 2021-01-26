@@ -59,7 +59,7 @@ func (l *tileLayer) outside(b, a int32) bool {
 	return a >= int32(len(l.tiles)) || b >= int32(len(l.tiles[0])) || a < 0 || b < 0
 }
 
-func (l *tileLayer) BackOffVector(o object.GameObject) (isGroundedPositive, isGroundedNegative, delta math.Vector2D) {
+func (l *tileLayer) BackOffVector(o object.GameObject) (r object.BackOffInfo) {
 	xP, yP, wP, hP := o.GetCollider().Values()
 
 	// TODO refactor me
@@ -68,22 +68,30 @@ func (l *tileLayer) BackOffVector(o object.GameObject) (isGroundedPositive, isGr
 	for i := x - 2; i <= w+x; i++ {
 		for j := y - 2; j <= h+y; j++ {
 			if !l.outside(i, j) && l.tiles[j][i] != 0 {
-				if math.Abs(j*l.tileSize-yP-hP) <= margin && xP < (i+1)*l.tileSize && xP+wP > i*l.tileSize {
-					isGroundedPositive.Y = 1
-					delta.Y = float64(j*l.tileSize - yP - hP)
+				if !math.RectIntersect(math.Rect{X: xP, Y: yP, W: wP, H: hP}, math.Rect{X: i * l.tileSize, Y: j * l.tileSize, W: l.tileSize, H: l.tileSize}) {
+					continue
 				}
-				if math.Abs(i*l.tileSize-xP-wP) <= margin && yP < (j+1)*l.tileSize && yP+hP > j*l.tileSize {
-					isGroundedPositive.X = 1
-					delta.X = float64(i*l.tileSize - xP - wP)
+				tileX1, tileY1, tileX2, tileY2 := i*l.tileSize, j*l.tileSize, (i+1)*l.tileSize, (j+1)*l.tileSize
+				actions := []object.BackOffInfo{
+					{DownGrounded: true, Delta: math.NewIntVector(0, tileY1-(yP+hP)).FloatV()},
+					{UpGrounded: true, Delta: math.NewIntVector(0, tileY2-yP).FloatV()},
+					{LeftGrounded: true, Delta: math.NewIntVector(tileX2-xP, 0).FloatV()},
+					{RightGrounded: true, Delta: math.NewIntVector(tileX1-(xP+wP), 0).FloatV()},
 				}
-				if math.Abs(xP-(i+1)*l.tileSize) <= margin && yP < (j+1)*l.tileSize && yP+hP > j*l.tileSize {
-					isGroundedNegative.X = -1
-					delta.X = float64((i+1)*l.tileSize - xP)
+				res := actions[0]
+				for _, a := range actions {
+					if a.Delta.Abs() < res.Delta.Abs() {
+						res = a
+					}
 				}
-				if math.Abs(yP-(j+1)*l.tileSize) <= margin && xP < (i+1)*l.tileSize && xP+wP > i*l.tileSize {
-					isGroundedNegative.Y = -1
-					delta.Y = float64((j+1)*l.tileSize - yP)
-				}
+
+				r.Delta = r.Delta.Add(res.Delta)
+				xP += int32(res.Delta.X)
+				yP += int32(res.Delta.Y)
+				r.DownGrounded = res.DownGrounded || r.DownGrounded
+				r.UpGrounded = res.UpGrounded || r.UpGrounded
+				r.LeftGrounded = res.LeftGrounded || r.LeftGrounded
+				r.RightGrounded = res.RightGrounded || r.RightGrounded
 			}
 		}
 	}
@@ -102,11 +110,13 @@ func (l *tileLayer) getTileSetByID(id int) *TileSet {
 type objectLayer struct {
 	objects []object.GameObject
 
+	deletedIDs map[object.GameObject]struct{}
+
 	collision bool
 }
 
 func NewObjectLayer(obj []object.GameObject, collision bool) *objectLayer {
-	return &objectLayer{objects: obj, collision: collision}
+	return &objectLayer{objects: obj, collision: collision, deletedIDs: map[object.GameObject]struct{}{}}
 }
 
 func (o *objectLayer) Render() (err error) {
@@ -119,6 +129,16 @@ func (o *objectLayer) Render() (err error) {
 }
 
 func (o *objectLayer) Update() (err error) {
+	if len(o.deletedIDs) != 0 {
+		newOBJ := make([]object.GameObject, 0, len(o.objects))
+		for _, obj := range o.objects {
+			if _, ok := o.deletedIDs[obj]; !ok {
+				newOBJ = append(newOBJ, obj)
+			}
+		}
+		o.objects = newOBJ
+		o.deletedIDs = map[object.GameObject]struct{}{}
+	}
 	for _, o := range o.objects {
 		if err = o.Update(); err != nil {
 			return
@@ -130,9 +150,6 @@ func (o *objectLayer) Update() (err error) {
 func (o *objectLayer) Collision(tileLayers []*tileLayer) (err error) {
 	for _, o := range o.objects {
 		for _, tl := range tileLayers {
-			if !tl.collision {
-				continue
-			}
 			o.BackOff(tl.BackOffVector(o))
 		}
 	}

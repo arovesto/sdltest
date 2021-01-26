@@ -6,6 +6,7 @@ import (
 	"github.com/arovesto/sdl/pkg/input"
 	"github.com/arovesto/sdl/pkg/level"
 	"github.com/arovesto/sdl/pkg/math"
+	"github.com/arovesto/sdl/pkg/model"
 	"github.com/arovesto/sdl/pkg/object"
 	"github.com/arovesto/sdl/pkg/sound"
 	"github.com/arovesto/sdl/pkg/state"
@@ -22,6 +23,8 @@ type player struct {
 	shootAt    uint32
 	rotatingAt uint32
 	rotating   bool
+
+	SpawnedAt uint32
 }
 
 func NewPlayer(st object.Properties) object.GameObject {
@@ -49,6 +52,15 @@ func (p *player) handleInput() error {
 			return err
 		}
 		level.CurrentLevel.NewObj(NewBullet(pivotPos, p.model.Parts[0].GetAngle().ToVec().Mul(15)))
+	}
+
+	if input.GetMousePressed(input.RIGHT) && now-p.SpawnedAt > 1000 {
+		p.SpawnedAt = now
+		level.CurrentLevel.NewObj(NewEnemy(object.Properties{
+			Pos:   mousePos,
+			Model: model.AvailableModels["evil_tank"].GetCopy(),
+			ID:    global.NewID(),
+		}))
 	}
 
 	if input.IsKeyDown(sdl.SCANCODE_E) {
@@ -99,7 +111,6 @@ func (p *player) handleInput() error {
 		p.model.Parts[1].Flip = sdl.FLIP_NONE
 	}
 
-	camera.Camera.MainTarget = p.pos.Add(math.NewVec(200, 1000*p.acc.Y))
 	var player math.Vector2D
 	switch {
 	case input.IsKeyDown(sdl.SCANCODE_D):
@@ -112,7 +123,12 @@ func (p *player) handleInput() error {
 		p.changeSprite(2)
 		p.model.Parts[2].Flip = sdl.FLIP_HORIZONTAL
 		p.model.GlobalFlip = sdl.FLIP_HORIZONTAL
-	default:
+	}
+
+	if p.model.Parts[0].Flip&sdl.FLIP_HORIZONTAL == 0 {
+		camera.Camera.MainTarget = p.pos.Add(math.NewVec(600, -200))
+	} else {
+		camera.Camera.MainTarget = p.pos.Add(math.NewVec(-600, -200))
 	}
 
 	friction := p.vel.Mul(-0.1)

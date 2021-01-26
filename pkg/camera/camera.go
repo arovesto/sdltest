@@ -42,18 +42,19 @@ func (c *camera) Update() {
 	var target math.Vector2D
 	var haveTarget bool
 	for _, t := range c.Targets {
-		if math.Near(target, c.MainTarget, c.center) {
+		if math.PointInRect(c.GetRect(), t.Pos) {
+			target = target.Add(t.Pos)
 			haveTarget = true
-			target = target.Add(t.Pos.Mul(t.Weight))
 		}
 	}
 
-	if math.Near(target, c.MainTarget, c.center) && haveTarget {
-		target = c.MainTarget.Add(target).Div(2)
+	if haveTarget {
+		target = c.MainTarget.Add(target.DivComponents(c.approachSpeed))
 	} else {
 		target = c.MainTarget
 	}
 
 	c.vel = target.Sub(c.center).Sub(c.Pos).DivComponents(c.approachSpeed)
 	c.Pos = c.Pos.Add(c.vel)
+	c.Targets = map[global.ID]Target{}
 }
