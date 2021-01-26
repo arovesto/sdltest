@@ -79,7 +79,7 @@ func (m *menuObject) updateModelAfterScaleChange(oldScale, newScale math.IntVect
 	}
 }
 
-func (m *menuObject) Update() error {
+func (m *menuObject) Update(float64) error {
 	w, h := global.GetSize()
 	if w != m.screen.X || h != m.screen.Y {
 		old := m.screen

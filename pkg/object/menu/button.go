@@ -25,7 +25,7 @@ func NewButton(st object.Properties) object.GameObject {
 	return &button{menuObject: newMenuObject(st), cID: st.Callback}
 }
 
-func (b *button) Update() error {
+func (b *button) Update(t float64) error {
 	// TODO: delay can be introduced to allow button be visible UP before callback
 	if b.wasPressed && b.released {
 		b.wasPressed = false
@@ -48,5 +48,5 @@ func (b *button) Update() error {
 		b.model.ChangeSprites(OUT)
 	}
 
-	return b.menuObject.Update()
+	return b.menuObject.Update(t)
 }

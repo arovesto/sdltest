@@ -31,14 +31,14 @@ func NewPlayer(st object.Properties) object.GameObject {
 	return &player{shooterObject: newShooterObj(st)}
 }
 
-func (p *player) Update() (err error) {
-	if err = p.handleInput(); err != nil {
+func (p *player) Update(tDelta float64) (err error) {
+	if err = p.handleInput(tDelta); err != nil {
 		return err
 	}
-	return p.shooterObject.Update()
+	return p.shooterObject.Update(tDelta)
 }
 
-func (p *player) handleInput() error {
+func (p *player) handleInput(tDelta float64) error {
 	now := sdl.GetTicks()
 	mousePos := input.GetMousePositionInCamera().FloatV()
 	pivotPos := p.model.Parts[0].GetPivot(p.pos.IntVector()).FloatV()
@@ -51,7 +51,7 @@ func (p *player) handleInput() error {
 		if err := sound.PlaySound("shot", 0); err != nil {
 			return err
 		}
-		level.CurrentLevel.NewObj(NewBullet(pivotPos, p.model.Parts[0].GetAngle().ToVec().Mul(15)))
+		level.CurrentLevel.NewObj(NewBullet(pivotPos, p.model.Parts[0].GetAngle().ToVec().Mul(1500)))
 	}
 
 	if input.GetMousePressed(input.RIGHT) && now-p.SpawnedAt > 1000 {
@@ -79,7 +79,7 @@ func (p *player) handleInput() error {
 		p.model.Parts[1].Frame = 0
 	}
 	if input.IsKeyDown(sdl.SCANCODE_W) {
-		p.vel.Y = -4
+		p.vel.Y = -400
 	}
 
 	oldFlip := p.model.Parts[0].Flip
@@ -92,7 +92,7 @@ func (p *player) handleInput() error {
 	}
 
 	requiredAngle := math.AngleOn(pivotPos, mousePos)
-	p.model.Parts[0].Angle += math.ClampAngle(requiredAngle-p.model.Parts[0].Angle, gunSpeed)
+	p.model.Parts[0].Angle += math.ClampAngle((requiredAngle-p.model.Parts[0].Angle)*math.AngleDeg(5*tDelta), gunSpeed)
 	p.model.Parts[0].ClampAngle()
 
 	if oldFlip != p.model.Parts[0].Flip {
@@ -114,24 +114,24 @@ func (p *player) handleInput() error {
 	var player math.Vector2D
 	switch {
 	case input.IsKeyDown(sdl.SCANCODE_D):
-		player.X = 0.1
+		player.X = 1000
 		p.changeSprite(2)
 		p.model.Parts[2].Flip = sdl.FLIP_NONE
 		p.model.GlobalFlip = sdl.FLIP_NONE
 	case input.IsKeyDown(sdl.SCANCODE_A):
-		player.X = -0.1
+		player.X = -1000
 		p.changeSprite(2)
 		p.model.Parts[2].Flip = sdl.FLIP_HORIZONTAL
 		p.model.GlobalFlip = sdl.FLIP_HORIZONTAL
 	}
 
 	if p.model.Parts[0].Flip&sdl.FLIP_HORIZONTAL == 0 {
-		camera.Camera.MainTarget = p.pos.Add(math.NewVec(600, -200))
+		camera.Camera.MainTarget = p.pos.Add(math.NewVec(600+p.vel.X/1000, -200))
 	} else {
-		camera.Camera.MainTarget = p.pos.Add(math.NewVec(-600, -200))
+		camera.Camera.MainTarget = p.pos.Add(math.NewVec(-500+p.vel.X/1000, -200))
 	}
 
-	friction := p.vel.Mul(-0.1)
+	friction := p.vel.Mul(-500000 * tDelta)
 	if player.X == 0 || (friction.X > 0) == (player.X > 0) {
 		p.acc = friction.Add(player)
 	} else {

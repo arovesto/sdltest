@@ -1,13 +1,15 @@
 package level
 
 import (
+	"github.com/arovesto/sdl/pkg/level"
+
 	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/math"
 	"github.com/arovesto/sdl/pkg/object"
 )
 
 const (
-	backgroundSpeed = 10
+	backgroundSpeed = 100
 )
 
 type background struct {
@@ -44,8 +46,9 @@ func (b *background) init() {
 	b.scrollLine = width
 }
 
-func (b *background) Update() error {
-	pos, _, width, height := camera.Camera.GetRect().Values()
+func (b *background) Update(float64) error {
+	_, _, width, height := camera.Camera.GetRect().Values()
+	pos := int32(level.CurrentLevel.GetPlayer().GetPosition().X)
 	b.scrollLine -= (pos - b.prevCamPos) / b.speed
 	if (pos-b.prevCamPos)/b.speed != 0 {
 		b.prevCamPos = pos

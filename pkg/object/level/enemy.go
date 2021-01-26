@@ -20,7 +20,7 @@ func (e *enemy) GetType() object.Type {
 	return object.EnemyType
 }
 
-func (e *enemy) Update() error {
+func (e *enemy) Update(tDelta float64) error {
 	dist := math.AbsF(level.CurrentLevel.GetPlayer().GetPosition().X - e.pos.X)
 	var w float64
 	switch {
@@ -39,7 +39,7 @@ func (e *enemy) Update() error {
 	} else {
 		delete(camera.Camera.Targets, e.id)
 	}
-	return e.shooterObject.Update()
+	return e.shooterObject.Update(tDelta)
 }
 
 func (e *enemy) Collide(other object.GameObject) error {

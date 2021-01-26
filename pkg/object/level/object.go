@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	maxSpeed      = 10
+	maxSpeed      = 10000
 	animationTime = 200
 )
 
@@ -41,19 +41,19 @@ func newShooterObj(st object.Properties) shooterObject {
 	}
 }
 
-func (s *shooterObject) Update() error {
-	s.acc.Y = 0.1
+func (s *shooterObject) Update(delta float64) error {
+	s.acc.Y = 1000
 	s.acc = math.ClampDirection(s.acc, s.gr.UpGrounded, s.gr.DownGrounded, s.gr.LeftGrounded, s.gr.RightGrounded)
 	s.vel = math.ClampDirection(s.vel, s.gr.UpGrounded, s.gr.DownGrounded, s.gr.LeftGrounded, s.gr.RightGrounded)
 
-	s.vel = s.vel.Add(s.acc)
+	s.vel = s.vel.Add(s.acc.Mul(delta))
 	if math.AbsF(s.vel.X) > math.AbsF(s.maxSpeed) {
 		s.vel.X = s.maxSpeed * math.SignF(s.vel.X)
 	}
 	if math.AbsF(s.vel.Y) > math.AbsF(s.maxSpeed) {
 		s.vel.Y = s.maxSpeed * math.SignF(s.vel.Y)
 	}
-	s.pos = s.pos.Add(s.vel)
+	s.pos = s.pos.Add(s.vel.Mul(delta))
 	return nil
 }
 

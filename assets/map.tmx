@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="120" height="34" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="372">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="1000" height="34" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="372">
  <tileset firstgid="1" name="tileset" tilewidth="32" tileheight="32" spacing="1" tilecount="336" columns="24">
   <image source="tileset.png" width="791" height="461"/>
  </tileset>
@@ -9,33 +9,34 @@
  <objectgroup id="5" name="background" visible="0">
   <object id="12" name="Background" type="background" x="0" y="0" width="1920" height="1088">
    <properties>
+    <property name="animSpeed" value="28"/>
     <property name="model" value="background"/>
    </properties>
   </object>
   <object id="12" name="Hills" type="background" x="0" y="0" width="1920" height="1088">
    <properties>
-    <property name="animSpeed" value="8"/>
+    <property name="animSpeed" value="12"/>
     <property name="model" value="hills"/>
    </properties>
   </object>
   <object id="12" name="Hill" type="background" x="0" y="0" width="1920" height="1088">
    <properties>
-    <property name="animSpeed" value="6"/>
+    <property name="animSpeed" value="8"/>
     <property name="model" value="hill"/>
    </properties>
   </object>
  </objectgroup>
- <layer id="1" name="background" width="120" height="34">
+ <layer id="1" name="background" width="1000" height="34">
   <properties>
    <property name="collision" type="bool" value="true"/>
   </properties>
   <data encoding="base64" compression="zlib">
-   eJzt2lEOwUAUheEpq1CrxGKsATvwhh1YhmcL0MmQNDI67tDcO9P/S06EVGfSIzRynUPN7g2pOQAAAAB0+Nvx2ReZa20QP2kFQXnodxroFQAAAAAAAADsOmpvAKO6Kq69jsxVxl5DPs1+94prTwX9pm2bEM1jc99Dv2n0m6eUfq2RzC9Yu78awlxGUEq/UvQb0G/dJNfhNtou0vz3s/8Nfs9L/7l/bCPHDiU2d9efjZbMYVrPTnhtfA6fqzFh4fKvx/J5jlX3GdtU8J/KqctZmMsf138AO621nA==
+   eJzt3NFpwlAYhuETncJ0Q+/ULVzAGdpu4J11A8dwCj1EQYo2OaHyJ/o88FLUKAe9+qA6rxIAAAAQaH7e5mtJkiRJkhQeAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/L/8c/KRD06gDAgAAwBuoCwIAAACewz4HAACA4bDLAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYFy20QcAAAAA0iH6AAAAAAzesup2H/3Z5wAAALT5ij7AG7DPAQAAaDOWfb6pmiKv7fsc+xwAAIA29rl9DgAAQLyx7POhqQuutc8BAABoU/pbcCW79JXZ5wAAAESyzxv2OQAAAJHs80bJ+3B82ikAAAB4Ffn/2/N30H93dXs7/63vXPtX9Z0ml6YPHh9rn4XvTe778UcDAAAAnc1S/z37cXmNRZXSqvB78EO0O/dT2D7kpAAAAEQ6AaHOYrA=
   </data>
  </layer>
- <layer id="4" name="foreground" width="120" height="34">
+ <layer id="4" name="foreground" width="1000" height="34">
   <data encoding="base64" compression="zlib">
-   eJztzjENACAMAMFiARnIQAP+teCAbg1N7rbfPgIAAAAAAAAAAAAAAAAAasyk6W0lTW/70WdUngD86wIidwFS
+   eJztziERACAQAMGnAjGIQQb6Z0FjePUMYteduwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOPWkAQAAgHojaQAAAKDevPRqL08AAAAAAAAAAAAAAPjFBqf3AVI=
   </data>
  </layer>
  <objectgroup id="2" name="objects">

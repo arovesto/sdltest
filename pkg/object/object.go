@@ -8,7 +8,7 @@ import (
 
 type GameObject interface {
 	Draw() error
-	Update() error
+	Update(tDelta float64) error
 	Destroy() error
 	Collide(other GameObject) error
 	GetPosition() math.Vector2D

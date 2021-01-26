@@ -23,12 +23,12 @@ func NewText(st object.Properties) object.GameObject {
 	return &text{menuObject: newMenuObject(st), cID: st.Callback, font: f}
 }
 
-func (t *text) Update() (err error) {
+func (t *text) Update(tD float64) (err error) {
 	t.txt, err = t.c()
 	if err != nil {
 		return err
 	}
-	return t.menuObject.Update()
+	return t.menuObject.Update(tD)
 }
 
 func (t *text) Draw() error {

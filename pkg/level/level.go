@@ -44,14 +44,28 @@ func NewLevel(s []*TileSet, l []Layer) *Level {
 }
 
 func (l *Level) Update() (err error) {
-	for _, l := range l.layers {
-		if err = l.Update(); err != nil {
-			return
+	now := sdl.GetPerformanceCounter()
+	target := now + sdl.GetPerformanceFrequency()/1000*10 // toMS and 10 milliseconds
+	l.mainLayer.updatedAt = now
+	for now < target {
+		if err = l.mainLayer.Update(); err != nil {
+			return err
 		}
+		if err = l.mainLayer.Collision(l.collisionTileLayers); err != nil {
+			return err
+		}
+		now = sdl.GetPerformanceCounter()
 	}
-	if err = l.mainLayer.Collision(l.collisionTileLayers); err != nil {
-		return err
+
+	for _, lr := range l.layers {
+		if lr != l.mainLayer {
+			if err = lr.Update(); err != nil {
+				return
+			}
+		}
+
 	}
+
 	return
 }
 

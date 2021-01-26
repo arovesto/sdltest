@@ -4,7 +4,7 @@ background:
     - frames: 1
   collider:
     w: 1920
-    h: 1088
+    h: 1080
   texture_path: "assets/background.png"
   ignore_cam: true
 hills:
@@ -12,8 +12,8 @@ hills:
     - frames: 1
     - frames: 1
   collider:
-    w: 2048
-    h: 1024
+    w: 1920
+    h: 1080
   texture_path: "assets/hills.png"
   ignore_cam: true
 hill:
@@ -21,8 +21,8 @@ hill:
     - frames: 1
     - frames: 1
   collider:
-    w: 2048
-    h: 1024
+    w: 1920
+    h: 1080
   texture_path: "assets/hill.png"
   ignore_cam: true
 tank:

@@ -18,19 +18,19 @@ func NewBullet(from, vel math.Vector2D) object.GameObject {
 	if vel.X < 0 {
 		delta.X *= -1
 	}
-	return &bullet{shooterObject: shooterObject{pos: from.Sub(delta), vel: vel, model: m, maxSpeed: 100}}
+	return &bullet{shooterObject: shooterObject{pos: from.Sub(delta), vel: vel, model: m, maxSpeed: 10000}}
 }
 
 func (b *bullet) GetType() object.Type {
 	return object.BulletType
 }
 
-func (b *bullet) Update() error {
+func (b *bullet) Update(tDelta float64) error {
 	b.model.Parts[0].Angle = math.AngleOn(math.ZeroVec(), b.vel)
 	if b.vel.X < 0 {
 		b.model.Parts[0].Flip = sdl.FLIP_HORIZONTAL
 	}
-	return b.shooterObject.Update()
+	return b.shooterObject.Update(tDelta)
 }
 
 func (b *bullet) BackOff(gr object.BackOffInfo) {

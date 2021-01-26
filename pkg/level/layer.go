@@ -1,9 +1,12 @@
 package level
 
 import (
+	"log"
+
 	"github.com/arovesto/sdl/pkg/camera"
 	"github.com/arovesto/sdl/pkg/math"
 	"github.com/arovesto/sdl/pkg/object"
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 const (
@@ -88,12 +91,23 @@ func (l *tileLayer) BackOffVector(o object.GameObject) (r object.BackOffInfo) {
 				r.Delta = r.Delta.Add(res.Delta)
 				xP += int32(res.Delta.X)
 				yP += int32(res.Delta.Y)
+				// TODO calculate this in separate cycle, some goings can unstuck previous stucks
+				/*
+						+----+
+						|	 |+==+
+						|	 |[  ]
+						+----++==+
+					         ^- search for this situation. We are hope that after delta cycle we are unstuck so we check for grounded
+				*/
 				r.DownGrounded = res.DownGrounded || r.DownGrounded
 				r.UpGrounded = res.UpGrounded || r.UpGrounded
 				r.LeftGrounded = res.LeftGrounded || r.LeftGrounded
 				r.RightGrounded = res.RightGrounded || r.RightGrounded
 			}
 		}
+	}
+	if o.GetType() == object.PlayerType && r.Delta.Abs() != 0 {
+		log.Println(r)
 	}
 	return
 }
@@ -112,6 +126,8 @@ type objectLayer struct {
 
 	deletedIDs map[object.GameObject]struct{}
 
+	updatedAt uint64
+
 	collision bool
 }
 
@@ -129,6 +145,9 @@ func (o *objectLayer) Render() (err error) {
 }
 
 func (o *objectLayer) Update() (err error) {
+	now := sdl.GetPerformanceCounter()
+	delta := float64(now-o.updatedAt) / float64(sdl.GetPerformanceFrequency())
+	o.updatedAt = now
 	if len(o.deletedIDs) != 0 {
 		newOBJ := make([]object.GameObject, 0, len(o.objects))
 		for _, obj := range o.objects {
@@ -139,8 +158,9 @@ func (o *objectLayer) Update() (err error) {
 		o.objects = newOBJ
 		o.deletedIDs = map[object.GameObject]struct{}{}
 	}
+
 	for _, o := range o.objects {
-		if err = o.Update(); err != nil {
+		if err = o.Update(delta); err != nil {
 			return
 		}
 	}

@@ -28,7 +28,8 @@ func init() {
 
 func (g *gameover) Update() (err error) {
 	for _, o := range g.objects {
-		if err = o.Update(); err != nil {
+		// TODO now mouse object really should be separated thing
+		if err = o.Update(0); err != nil {
 			return
 		}
 	}

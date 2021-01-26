@@ -66,7 +66,8 @@ func (p *pause) Update() (err error) {
 	}
 
 	for _, o := range p.objects {
-		if err = o.Update(); err != nil {
+		// TODO now mouse object really should be separated thing
+		if err = o.Update(0); err != nil {
 			return
 		}
 	}

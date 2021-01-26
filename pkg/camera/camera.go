@@ -41,18 +41,21 @@ func (c *camera) Reset() {
 func (c *camera) Update() {
 	var target math.Vector2D
 	var haveTarget bool
+	var div float64
 	for _, t := range c.Targets {
 		if math.PointInRect(c.GetRect(), t.Pos) {
-			target = target.Add(t.Pos)
+			target = target.Add(t.Pos).Mul(t.Weight)
+			div += t.Weight
 			haveTarget = true
 		}
 	}
+	target = c.MainTarget.Add(target.Div(div).DivComponents(c.approachSpeed))
 
-	if haveTarget {
-		target = c.MainTarget.Add(target.DivComponents(c.approachSpeed))
-	} else {
+	if !haveTarget || !math.PointInRect(c.GetRect(), target) {
 		target = c.MainTarget
 	}
+
+	// TODO if target not in cam rec - some margin do just move camera so it is in that margin
 
 	c.vel = target.Sub(c.center).Sub(c.Pos).DivComponents(c.approachSpeed)
 	c.Pos = c.Pos.Add(c.vel)

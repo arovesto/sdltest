@@ -29,7 +29,8 @@ func init() {
 
 func (m *menu) Update() (err error) {
 	for _, o := range m.objects {
-		if err = o.Update(); err != nil {
+		// TODO now mouse object really should be separated thing
+		if err = o.Update(0); err != nil {
 			return
 		}
 	}
